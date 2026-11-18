@@ -38,7 +38,8 @@ html[data-firefonts] *:not(
   [class^="ri-"], [class*=" ri-"],
   pre, pre *, code, code *, kbd, kbd *, samp, samp *, tt, tt *,
   [class*="monospace" i], [class*="monospace" i] *,
-  .react-code-text, .react-code-line-contents, .react-code-line-contents *, .react-blob-textarea,
+  .react-code-text, .react-code-line-contents, .react-code-line-contents *,
+  .react-blob-textarea, [class*="BlobTextarea" i], [data-testid="read-only-cursor-text-area"],
   .blob-code-inner, .blob-code-inner *
 ) {
   font-family: var(--firefonts-font) !important;
