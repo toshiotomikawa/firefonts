@@ -74,7 +74,31 @@ function schedule() {
 
 browser.runtime.onStartup.addListener(schedule);
 browser.runtime.onInstalled.addListener(schedule);
-browser.permissions.onAdded.addListener(schedule);
+// The popup closes while Firefox asks for a site, so tabs already open on it get the font from here.
+async function applyOpen(origins = []) {
+  for (const origin of origins) {
+    for (const tab of await browser.tabs.query({ url: origin })) {
+      const every = async (run, details) => {
+        try {
+          await run({ ...details, target: { tabId: tab.id, allFrames: true } });
+        } catch {
+          await run({ ...details, target: { tabId: tab.id } });
+        }
+      };
+      try {
+        await every((d) => browser.scripting.insertCSS(d), { files: ["fonts.css"], origin: "USER" });
+        await every((d) => browser.scripting.executeScript(d), { files: ["lib.js", "apply.js"] });
+      } catch (error) {
+        console.error("firefonts:", origin, error);
+      }
+    }
+  }
+}
+
+browser.permissions.onAdded.addListener((added) => {
+  schedule();
+  applyOpen(added.origins).catch((error) => console.error("firefonts:", error));
+});
 browser.permissions.onRemoved.addListener(schedule);
 browser.storage.onChanged.addListener((changes, area) => {
   if (area === "sync" && Object.keys(changes).some((k) => k.startsWith(FF.PREFIX) || k === "sites")) schedule();

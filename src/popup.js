@@ -104,12 +104,16 @@ on.addEventListener("change", () => {
     request = Promise.reject();
   }
   asking = true;
-  request
-    .then(async (granted) => {
+  // Firefox closes the popup while its prompt is open, so the font is saved now; the background script
+  // applies it to the open tab once the site is allowed. Without the site's permission it stays unused.
+  const saving = save(true);
+  Promise.all([request, saving])
+    .then(async ([granted]) => {
       asking = false;
-      // Turned off, or the font cleared, while the prompt was open.
+      // Refused, or turned off or cleared while the prompt was open.
       if (!granted || !on.checked || !check()) {
         on.checked = false;
+        await save(false);
         return;
       }
       await turnOn();
