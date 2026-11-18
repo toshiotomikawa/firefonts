@@ -57,14 +57,22 @@ function block() {
   $("blocked").hidden = false;
 }
 
-// Applies the font to the open tab now, frames included; later visits use the registered script.
+// Runs an injection in every frame, or in the page alone when a frame refuses it; only the page must succeed.
+async function everyFrame(run, details) {
+  try {
+    await run({ ...details, target: { tabId: tab.id, allFrames: true } });
+  } catch {
+    await run({ ...details, target: { tabId: tab.id } });
+  }
+}
+
+// Applies the font to the open tab now; later visits use the registered script.
 async function inject() {
-  const target = { tabId: tab.id, allFrames: true };
   if (!styled) {
-    await browser.scripting.insertCSS({ target, files: ["fonts.css"], origin: "USER" });
+    await everyFrame((d) => browser.scripting.insertCSS(d), { files: ["fonts.css"], origin: "USER" });
     styled = true;
   }
-  await browser.scripting.executeScript({ target, files: ["lib.js", "apply.js"] });
+  await everyFrame((d) => browser.scripting.executeScript(d), { files: ["lib.js", "apply.js"] });
 }
 
 async function turnOn() {

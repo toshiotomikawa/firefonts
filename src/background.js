@@ -52,8 +52,18 @@ async function sync() {
     return;
   }
   // Updating in place leaves no moment without the script, and keeps the old one if the update fails.
-  if (registered.length) await browser.scripting.updateContentScripts([{ ...SCRIPT, matches }]);
-  else await browser.scripting.registerContentScripts([{ ...SCRIPT, matches }]);
+  const write = (script) =>
+    registered.length
+      ? browser.scripting.updateContentScripts([script])
+      : browser.scripting.registerContentScripts([script]);
+  try {
+    await write({ ...SCRIPT, matches });
+  } catch (error) {
+    // A Firefox without the user origin or the frame fallback still gets the font, as a plain page stylesheet.
+    const { cssOrigin, matchOriginAsFallback, ...basic } = SCRIPT;
+    await write({ ...basic, matches });
+    console.error("firefonts: registered without user origin", error);
+  }
 }
 
 // Runs syncs one after another so they never overlap.
