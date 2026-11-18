@@ -4,13 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>firefonts</title>
+  <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <label class="row">
-    <span>Google Sans on YouTube</span>
-    <input type="checkbox" switch role="switch" id="enabled" checked>
-  </label>
+  <main id="app">
+    <label class="row">
+      <span>Change font on <span id="host">this site</span></span>
+      <input type="checkbox" switch role="switch" id="on">
+    </label>
+    <input type="text" id="font" value="Google Sans" aria-label="Font name" aria-describedby="note" placeholder="Font name, like Arial" spellcheck="false" autocomplete="off">
+    <p id="note" role="status"></p>
+  </main>
+  <p id="blocked" hidden>Firefox doesn't let extensions change this page.</p>
+  <script src="lib.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

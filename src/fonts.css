@@ -1,29 +1,30 @@
-/* Applies only while content.js marks the page; an installed Google Sans is used first. */
+/* Bundled Google Sans: an installed copy is used first, and nothing loads unless a site uses it. */
 @font-face {
-  font-family: "firefonts Google Sans";
-  font-weight: 400;
+  font-family: "Google Sans";
+  font-weight: 100 450;
   font-display: swap;
   src: local("Google Sans Regular"), local("GoogleSans-Regular"), url("fonts/GoogleSans-Regular.woff2") format("woff2");
 }
 @font-face {
-  font-family: "firefonts Google Sans";
-  font-weight: 500;
+  font-family: "Google Sans";
+  font-weight: 451 550;
   font-display: swap;
   src: local("Google Sans Medium"), local("GoogleSans-Medium"), url("fonts/GoogleSans-Medium.woff2") format("woff2");
 }
 @font-face {
-  font-family: "firefonts Google Sans";
-  font-weight: 600;
+  font-family: "Google Sans";
+  font-weight: 551 650;
   font-display: swap;
   src: local("Google Sans SemiBold"), local("GoogleSans-SemiBold"), url("fonts/GoogleSans-SemiBold.woff2") format("woff2");
 }
 @font-face {
-  font-family: "firefonts Google Sans";
-  font-weight: 700 900;
+  font-family: "Google Sans";
+  font-weight: 651 1000;
   font-display: swap;
   src: local("Google Sans Bold"), local("GoogleSans-Bold"), url("fonts/GoogleSans-Bold.woff2") format("woff2");
 }
 
-html[data-firefonts] *:not(svg, svg *) {
-  font-family: "firefonts Google Sans", sans-serif !important;
+/* The chosen font, set by apply.js; icons and code keep their own fonts. */
+html[data-firefonts] *:not(svg, svg *, i, [class*="icon" i], [class*="material-symbols" i], [class*="glyph" i], .fa, [class*="fa-"], pre, pre *, code, kbd, samp) {
+  font-family: var(--firefonts-font) !important;
 }

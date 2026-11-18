@@ -1,24 +1,33 @@
-@font-face {
-  font-family: "Google Sans";
-  font-weight: 500;
-  src: local("Google Sans Medium"), local("GoogleSans-Medium"), url("fonts/GoogleSans-Medium.woff2") format("woff2");
-}
-
 :root {
   color-scheme: light dark;
   --bg: light-dark(#ffffff, #1f1f23);
   --text: light-dark(#1b1b1f, #ececf1);
-  --track: light-dark(#74747e, #8e8e99);
+  --muted: light-dark(#5e5e66, #a8a8b3);
+  --line: light-dark(#74747e, #8e8e99);
   --accent: light-dark(#0b57d0, #a8c7fa);
   --knob: light-dark(#ffffff, #1f1f23);
-  --gap: 16px;
+  --gap: 12px;
+  --page: 16px;
 }
 
 body {
   margin: 0;
+  width: 280px;
   background: var(--bg);
   color: var(--text);
-  font: 500 16px/1.5 "Google Sans", system-ui, sans-serif;
+  font: 400 16px/1.5 "Google Sans", system-ui, sans-serif;
+}
+
+main,
+#blocked {
+  display: grid;
+  gap: var(--gap);
+  margin: 0;
+  padding: var(--page);
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .row {
@@ -26,10 +35,35 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
-  min-width: 240px;
   min-height: 48px;
-  padding: 8px var(--gap);
   cursor: pointer;
+}
+
+#host {
+  overflow-wrap: anywhere;
+}
+
+#font {
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0 var(--gap);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+}
+
+#note {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Keeps the live region in place without leaving a gap. */
+#note:empty {
+  margin-top: calc(-1 * var(--gap));
 }
 
 [role="switch"] {
@@ -40,7 +74,7 @@ body {
   height: 32px;
   margin: 0;
   border-radius: 16px;
-  background: var(--track);
+  background: var(--line);
   cursor: pointer;
   transition: background-color 150ms;
 }
@@ -65,7 +99,7 @@ body {
   translate: 20px 0;
 }
 
-[role="switch"]:focus-visible {
+:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "firefonts",
   "version": "0.1.0",
-  "description": "Shows YouTube in Google Sans.",
+  "description": "Changes the font of the sites you choose.",
   "icons": { "48": "icon.svg", "96": "icon.svg" },
   "browser_specific_settings": {
     "gecko": {
@@ -13,24 +13,18 @@
     },
     "gecko_android": { "strict_min_version": "142.0" }
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "scripting", "activeTab"],
+  "optional_host_permissions": ["*://*/*"],
+  "background": { "scripts": ["lib.js", "background.js"] },
   "action": {
     "default_title": "firefonts",
     "default_icon": "icon.svg",
     "default_popup": "popup.html"
   },
-  "content_scripts": [
-    {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
-      "css": ["fonts.css"],
-      "js": ["content.js"],
-      "run_at": "document_start"
-    }
-  ],
   "web_accessible_resources": [
     {
       "resources": ["fonts/*.woff2"],
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"]
+      "matches": ["*://*/*"]
     }
   ]
 }
