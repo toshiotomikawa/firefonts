@@ -70,8 +70,8 @@ A 280px column with 16px padding and 12px between items: the switch row, the fon
 
 ## Components
 
-- **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for access to that site only.
-- **Font field:** a text field set in the typed font; a missing font shows "Not found on this computer" and the switch stays off.
+- **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for access to that site only. The switch is dimmed to half opacity until the popup has read the site's setting.
+- **Font field:** a text field set in the typed font. An empty or missing font shows "Type a font name" or "Not found on this computer"; the switch won't turn on, and if it is already on the note adds which font is still in use.
 - **Blocked page:** pages Firefox protects show one sentence instead of the controls.
 
 ## Do's and Don'ts

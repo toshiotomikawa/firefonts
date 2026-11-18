@@ -91,6 +91,11 @@ main,
   transition: translate 150ms;
 }
 
+[role="switch"]:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 [role="switch"]:checked {
   background: var(--accent);
 }

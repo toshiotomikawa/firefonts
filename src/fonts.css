@@ -24,7 +24,22 @@
   src: local("Google Sans Bold"), local("GoogleSans-Bold"), url("fonts/GoogleSans-Bold.woff2") format("woff2");
 }
 
-/* The chosen font, set by apply.js; icons and code keep their own fonts. */
-html[data-firefonts] *:not(svg, svg *, i, [class*="icon" i], [class*="material-symbols" i], [class*="glyph" i], .fa, [class*="fa-"], pre, pre *, code, kbd, samp) {
+/* The chosen font, set by apply.js. Icon fonts and code keep their own fonts, and so does what they hold.
+   Shadow DOM is out of reach: a page stylesheet can't style inside it. */
+html[data-firefonts] *:not(
+  svg, svg *,
+  i:empty,
+  [class*="icon" i]:not([class*="lexicon" i], [class*="silicon" i]),
+  [class~="icon" i] *,
+  [class*="material-symbols" i], [class*="material-icons" i], [class*="google-symbols" i], [class*="glyph" i],
+  .fa, .fas, .far, .fab, .fal, .fad, [class^="fa-"], [class*=" fa-"],
+  .mdi, [class^="mdi-"], [class*=" mdi-"],
+  .bi, [class^="bi-"], [class*=" bi-"],
+  [class^="ri-"], [class*=" ri-"],
+  pre, pre *, code, code *, kbd, kbd *, samp, samp *, tt, tt *,
+  [class*="monospace" i], [class*="monospace" i] *,
+  .react-code-text, .react-code-line-contents, .react-code-line-contents *, .react-blob-textarea,
+  .blob-code-inner, .blob-code-inner *
+) {
   font-family: var(--firefonts-font) !important;
 }

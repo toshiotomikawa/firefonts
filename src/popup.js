@@ -5,11 +5,19 @@ const font = $("font");
 const note = $("note");
 let tab;
 let host;
+// True while the permission prompt is open, so typing can't save before the site is granted.
+let asking = false;
+// The font in use on this site, named when the typed one can't replace it.
+let saved = "";
+// The stylesheet goes into the tab once per popup; it does nothing while the font is off.
+let styled = false;
 
 // True when this computer can draw the font, judged by text width against generic fonts.
 function available(name) {
-  if (FF.BUNDLED.includes(name)) return true;
+  if (FF.BUNDLED.includes(name) || FF.GENERIC.includes(name)) return true;
   const ctx = document.createElement("canvas").getContext("2d");
+  // Without a canvas there is no way to tell, so trust the name.
+  if (!ctx) return true;
   const sample = "mmmmmmmmmmlli1WQ@#";
   return ["monospace", "serif", "sans-serif"].some((base) => {
     ctx.font = `72px ${base}`;
@@ -19,20 +27,29 @@ function available(name) {
   });
 }
 
-// Previews the typed font in the field and says when it is missing.
+// Previews the typed font in the field and says what is wrong with it.
 function check() {
   const name = FF.cleanName(font.value);
-  font.style.fontFamily = name ? FF.cssFamily(name) : "";
+  font.style.fontFamily = FF.cssFamily(name);
   const ok = Boolean(name) && available(name);
-  note.textContent = name && !ok ? "Not found on this computer" : "";
+  const problem = !name ? "Type a font name" : ok ? "" : "Not found on this computer";
+  note.textContent = problem && on.checked && saved && saved !== name ? `${problem}. Still using ${saved}.` : problem;
   return ok;
 }
 
-async function save(enabled) {
-  const { sites = {} } = await browser.storage.sync.get("sites");
-  if (enabled) sites[host] = FF.cleanName(font.value);
-  else delete sites[host];
-  await browser.storage.sync.set({ sites });
+// Saves run one after another, so a quick off and on can't land out of order.
+let queue = Promise.resolve();
+function save(enabled) {
+  const key = FF.keyFor(host);
+  const value = FF.cleanName(font.value);
+  queue = queue.then(async () => {
+    await (enabled ? browser.storage.sync.set({ [key]: value }) : browser.storage.sync.remove(key));
+    saved = enabled ? value : "";
+  });
+  return queue.catch((error) => {
+    queue = Promise.resolve();
+    throw error;
+  });
 }
 
 function block() {
@@ -40,16 +57,30 @@ function block() {
   $("blocked").hidden = false;
 }
 
-// Applies the font to the open tab now; later visits use the registered script.
+// Applies the font to the open tab now, frames included; later visits use the registered script.
 async function inject() {
-  const target = { tabId: tab.id };
-  await browser.scripting.insertCSS({ target, files: ["fonts.css"] });
+  const target = { tabId: tab.id, allFrames: true };
+  if (!styled) {
+    await browser.scripting.insertCSS({ target, files: ["fonts.css"], origin: "USER" });
+    styled = true;
+  }
   await browser.scripting.executeScript({ target, files: ["lib.js", "apply.js"] });
+}
+
+async function turnOn() {
+  await save(true);
+  try {
+    await inject();
+  } catch {
+    await save(false);
+    block();
+  }
 }
 
 on.addEventListener("change", () => {
   if (!on.checked) {
-    save(false);
+    save(false).catch(() => {});
+    check();
     return;
   }
   if (!check()) {
@@ -58,46 +89,63 @@ on.addEventListener("change", () => {
     return;
   }
   // Firefox only shows the permission prompt during the click, so ask before any await.
-  browser.permissions.request({ origins: [FF.patternFor(host)] }).then(async (granted) => {
-    if (!granted) {
+  let request;
+  try {
+    request = browser.permissions.request({ origins: [FF.patternFor(host)] });
+  } catch {
+    request = Promise.reject();
+  }
+  asking = true;
+  request
+    .then(async (granted) => {
+      asking = false;
+      // Turned off, or the font cleared, while the prompt was open.
+      if (!granted || !on.checked || !check()) {
+        on.checked = false;
+        return;
+      }
+      await turnOn();
+    })
+    .catch(() => {
+      asking = false;
       on.checked = false;
-      return;
-    }
-    await save(true);
-    try {
-      await inject();
-    } catch {
-      await save(false);
-      block();
-    }
-  });
+      note.textContent = "Couldn't save the font";
+    });
 });
 
 let timer;
 font.addEventListener("input", () => {
   clearTimeout(timer);
   timer = setTimeout(() => {
-    if (check() && on.checked) save(true);
+    if (check() && on.checked && !asking) {
+      save(true).catch(() => {
+        note.textContent = "Couldn't save the font";
+      });
+    }
   }, 300);
 });
 
 async function init() {
   [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   try {
-    const url = new URL(tab.url);
+    const url = new URL(tab?.url);
     if (url.protocol === "https:" || url.protocol === "http:") host = url.hostname;
   } catch {}
-  if (!host) {
+  if (!FF.validHost(host) || FF.RESTRICTED.includes(host)) {
     block();
     return;
   }
   $("host").textContent = host.replace(/^www\./, "");
-  const { sites = {} } = await browser.storage.sync.get("sites");
-  if (sites[host]) {
-    font.value = sites[host];
-    on.checked = await browser.permissions.contains({ origins: [FF.patternFor(host)] });
+  const key = FF.keyFor(host);
+  saved = FF.cleanName((await browser.storage.sync.get(key))?.[key]);
+  if (saved) {
+    font.value = saved;
+    try {
+      on.checked = await browser.permissions.contains({ origins: [FF.patternFor(host)] });
+    } catch {}
   }
   check();
+  on.disabled = false;
 }
 
 init();
