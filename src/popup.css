@@ -1,0 +1,78 @@
+@font-face {
+  font-family: "Google Sans";
+  font-weight: 500;
+  src: local("Google Sans Medium"), local("GoogleSans-Medium"), url("fonts/GoogleSans-Medium.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#ffffff, #1f1f23);
+  --text: light-dark(#1b1b1f, #ececf1);
+  --track: light-dark(#74747e, #8e8e99);
+  --accent: light-dark(#0b57d0, #a8c7fa);
+  --knob: light-dark(#ffffff, #1f1f23);
+  --gap: 16px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 16px/1.5 "Google Sans", system-ui, sans-serif;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  min-width: 240px;
+  min-height: 48px;
+  padding: 8px var(--gap);
+  cursor: pointer;
+}
+
+[role="switch"] {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 52px;
+  height: 32px;
+  margin: 0;
+  border-radius: 16px;
+  background: var(--track);
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+[role="switch"]::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--knob);
+  transition: translate 150ms;
+}
+
+[role="switch"]:checked {
+  background: var(--accent);
+}
+
+[role="switch"]:checked::before {
+  translate: 20px 0;
+}
+
+[role="switch"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [role="switch"],
+  [role="switch"]::before {
+    transition: none;
+  }
+}

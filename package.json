@@ -1,0 +1,9 @@
+{
+  "name": "firefonts",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "lint": "web-ext lint --source-dir src --self-hosted"
+  }
+}
