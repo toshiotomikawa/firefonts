@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test test/",
+    "preview": "node dev/preview.mjs",
     "lint": "web-ext lint --source-dir src --self-hosted"
   }
 }

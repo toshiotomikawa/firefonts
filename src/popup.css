@@ -88,6 +88,10 @@ h1 {
   font-weight: 700;
 }
 
+#choose {
+  margin: 0;
+}
+
 #list {
   display: grid;
   margin: 0;
