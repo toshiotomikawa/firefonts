@@ -75,6 +75,51 @@ main,
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
+/* A round button holding one icon; its name is in aria-label and the tooltip. */
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.icon-button:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.icon-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  transition: transform 200ms ease;
+}
+
+.icon-button:hover svg {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-button svg {
+    transition: none;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
 /* The Your fonts page: a wider column with one row per added font. */
 body.page {
   width: auto;

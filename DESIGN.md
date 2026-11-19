@@ -51,6 +51,10 @@ components:
     rounded: "{rounded.md}"
     height: 48px
     padding: 0 12px
+  icon-button:
+    textColor: "{colors.primary}"
+    rounded: "{rounded.full}"
+    size: 48px
   switch-on:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.knob}"
@@ -75,7 +79,7 @@ Google Sans at one size, 16px, weight 400; the Your fonts heading uses weight 70
 
 ## Layout
 
-A 280px column with 16px padding and 12px between items: the switch row, the font field, a note that only takes space when it has something to say, and the Your fonts button. Every control is 48px tall. The Your fonts page uses the same tokens in a centred column up to 560px: a heading, the add button, and one 48px row per font.
+A 280px column with 16px padding and 12px between items: the switch row, the font field, a note that only takes space when it has something to say, and the Your fonts button. Every control is 48px tall. The Your fonts page uses the same tokens in a centred column up to 560px: the heading with its add icon on the right, "Choose your font:", and one 48px row per font.
 
 ## Components
 
@@ -83,6 +87,7 @@ A 280px column with 16px padding and 12px between items: the switch row, the fon
 - **Font field:** a text field set in the typed font. An empty or missing font shows "Type a font name" or "Not found on this computer"; the switch won't turn on, and if it is already on the note adds which font is still in use.
 - **Suggestions:** the field offers the user's own fonts first, then the 34 bundled ones.
 - **Button:** text in the accent colour on a clear background, tinted 10% on hover; used for Your fonts, Add font files and Remove.
+- **Icon button:** a 48px round button with one 24px icon in the accent colour, named by its aria-label and tooltip; tinted 10% on hover, where the icon turns a quarter (no motion with reduced motion). Icon buttons are preferred over text buttons. The plus beside the Your fonts heading adds font files.
 - **Font row:** each added font's name, drawn in that font, with a Remove button.
 - **Blocked page:** pages Firefox protects show one sentence instead of the controls.
 

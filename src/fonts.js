@@ -38,6 +38,8 @@ async function show() {
   }
 }
 
+document.getElementById("add").addEventListener("click", () => document.getElementById("files").click());
+
 document.getElementById("files").addEventListener("change", async (event) => {
   const failed = [];
   for (const file of event.target.files) {
