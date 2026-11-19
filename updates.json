@@ -1,0 +1,13 @@
+{
+  "addons": {
+    "firefonts@toshiotomikawa.github.io": {
+      "updates": [
+        {
+          "update_hash": "sha256:44ebca92c4350c9962ac5d322a6b832b8989d48d204389a9b90c7c6092fa0508",
+          "update_link": "https://github.com/toshiotomikawa/firefonts/releases/download/v0.1.3/Firefonts-0.1.3.xpi",
+          "version": "0.1.3"
+        }
+      ]
+    }
+  }
+}
