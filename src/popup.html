@@ -13,8 +13,10 @@
       <span>Change font on <span id="host">this site</span></span>
       <input type="checkbox" switch role="switch" id="on" disabled>
     </label>
-    <input type="text" id="font" value="Google Sans" aria-label="Font name" aria-describedby="note" placeholder="Font name, like Arial" spellcheck="false" autocomplete="off">
+    <input type="text" id="font" value="Google Sans" aria-label="Font name" aria-describedby="note" placeholder="Font name, like Arial" spellcheck="false" autocomplete="off" list="bundled">
+    <datalist id="bundled"></datalist>
     <p id="note" role="status"></p>
+    <button type="button" id="manage" class="button">Your fonts</button>
   </main>
   <p id="blocked" hidden>Firefox doesn't let extensions change this page.</p>
   <script src="lib.js"></script>

@@ -2,7 +2,42 @@
 // Pure helpers shared by the popup, the page script, the background script and the tests.
 (function (root) {
   // Fonts shipped with the extension, always available.
-  const BUNDLED = ["Google Sans"];
+  const BUNDLED = [
+    "Google Sans",
+    "Inter",
+    "Roboto",
+    "Open Sans",
+    "Lato",
+    "Montserrat",
+    "Poppins",
+    "Nunito",
+    "DM Sans",
+    "Work Sans",
+    "Source Sans 3",
+    "Figtree",
+    "Atkinson Hyperlegible Next",
+    "Lexend",
+    "Raleway",
+    "Merriweather",
+    "Lora",
+    "Playfair Display",
+    "EB Garamond",
+    "Libre Baskerville",
+    "Source Serif 4",
+    "Literata",
+    "Roboto Slab",
+    "JetBrains Mono",
+    "Fira Code",
+    "Source Code Pro",
+    "IBM Plex Mono",
+    "Roboto Mono",
+    "Oswald",
+    "Bebas Neue",
+    "Caveat",
+    "Dancing Script",
+    "Pacifico",
+    "Comic Neue",
+  ];
   // CSS generic families: always available, and written without quotes.
   const GENERIC = [
     "serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui", "math", "emoji", "fangsong",
@@ -47,6 +82,23 @@
   }
 
   const keyFor = (host) => PREFIX + host;
+  // Font files the user added are kept in local storage, each under its own key.
+  const FILE = "file:";
+  const fileKey = (name) => FILE + name;
+
+  // Works across Firefox's script compartments, where instanceof doesn't.
+  const isBuffer = (value) => Object.prototype.toString.call(value) === "[object ArrayBuffer]";
+
+  // Reads {name: font data} from local storage, skipping anything malformed.
+  function filesFrom(items) {
+    const files = {};
+    if (!items || typeof items !== "object") return files;
+    for (const [key, value] of Object.entries(items)) {
+      const name = key.startsWith(FILE) ? cleanName(key.slice(FILE.length)) : "";
+      if (name && isBuffer(value)) files[name] = value;
+    }
+    return files;
+  }
 
   // Reads {host: font} from everything in storage, skipping anything malformed.
   function sitesFrom(items) {
@@ -61,7 +113,7 @@
     return sites;
   }
 
-  const api = { BUNDLED, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom };
+  const api = { BUNDLED, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, FILE, fileKey, filesFrom, isBuffer };
   root.FF = api;
   if (typeof module !== "undefined") module.exports = api;
 })(globalThis);

@@ -46,6 +46,11 @@ components:
     rounded: "{rounded.full}"
     width: 52px
     height: 32px
+  button:
+    textColor: "{colors.primary}"
+    rounded: "{rounded.md}"
+    height: 48px
+    padding: 0 12px
   switch-on:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.knob}"
@@ -54,7 +59,7 @@ components:
 
 ## Overview
 
-One toolbar popup (`src/popup.html`), the simple mode: a switch to change the font on the open site, and the font's name. Nothing else to learn. It follows the system light or dark theme.
+One toolbar popup (`src/popup.html`), the simple mode: a switch to change the font on the open site, and the font's name. A second page, Your fonts (`src/fonts.html`), opens in a tab to add font files, since a file picker would close the popup. It follows the system light or dark theme.
 
 ## Colors
 
@@ -66,16 +71,19 @@ A neutral surface with one blue accent for the switch when on and for focus ring
 
 ## Typography
 
-Google Sans at one size, 16px, weight 400. The font field previews what is typed in that font.
+Google Sans at one size, 16px, weight 400; the Your fonts heading uses weight 700 at the same size. The font field previews what is typed in that font.
 
 ## Layout
 
-A 280px column with 16px padding and 12px between items: the switch row, the font field, and a note that only takes space when it has something to say. Every control is 48px tall.
+A 280px column with 16px padding and 12px between items: the switch row, the font field, a note that only takes space when it has something to say, and the Your fonts button. Every control is 48px tall. The Your fonts page uses the same tokens in a centred column up to 560px: a heading, the add button, and one 48px row per font.
 
 ## Components
 
 - **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for access to that site only. The switch is dimmed to half opacity until the popup has read the site's setting.
 - **Font field:** a text field set in the typed font. An empty or missing font shows "Type a font name" or "Not found on this computer"; the switch won't turn on, and if it is already on the note adds which font is still in use.
+- **Suggestions:** the field offers the user's own fonts first, then the 34 bundled ones.
+- **Button:** text in the accent colour on a clear background, tinted 10% on hover; used for Your fonts, Add font files and Remove.
+- **Font row:** each added font's name, drawn in that font, with a Remove button.
 - **Blocked page:** pages Firefox protects show one sentence instead of the controls.
 
 ## Do's and Don'ts

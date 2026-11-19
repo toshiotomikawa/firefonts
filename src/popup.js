@@ -11,10 +11,12 @@ let asking = false;
 let saved = "";
 // The stylesheet goes into the tab once per popup; it does nothing while the font is off.
 let styled = false;
+// Fonts the user added as files.
+const userFonts = [];
 
 // True when this computer can draw the font, judged by text width against generic fonts.
 function available(name) {
-  if (FF.BUNDLED.includes(name) || FF.GENERIC.includes(name)) return true;
+  if (FF.BUNDLED.includes(name) || FF.GENERIC.includes(name) || userFonts.includes(name)) return true;
   const ctx = document.createElement("canvas").getContext("2d");
   // Without a canvas there is no way to tell, so trust the name.
   if (!ctx) return true;
@@ -138,6 +140,18 @@ font.addEventListener("input", () => {
 });
 
 async function init() {
+  // Fonts the user added are loaded here too, so the field can preview them and knows they exist.
+  const files = FF.filesFrom(await browser.storage.local.get(null));
+  for (const [name, data] of Object.entries(files)) {
+    try {
+      const face = new FontFace(name, data);
+      await face.load();
+      document.fonts.add(face);
+      userFonts.push(name);
+    } catch {}
+  }
+  // The user's own fonts and the ones that ship with the extension are offered as suggestions.
+  $("bundled").append(...[...userFonts, ...FF.BUNDLED].map((name) => new Option(name)));
   [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   try {
     const url = new URL(tab?.url);
@@ -159,5 +173,11 @@ async function init() {
   check();
   on.disabled = false;
 }
+
+// A file picker would close the popup, so fonts are added on their own page.
+$("manage").addEventListener("click", () => {
+  browser.runtime.openOptionsPage();
+  window.close();
+});
 
 init();

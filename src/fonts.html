@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your fonts · Firefonts</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="page">
+  <main>
+    <h1>Your fonts</h1>
+    <label class="button">
+      Add font files
+      <input type="file" id="files" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
+    </label>
+    <p id="note" role="status"></p>
+    <ul id="list"></ul>
+  </main>
+  <script src="lib.js"></script>
+  <script src="fonts.js"></script>
+</body>
+</html>

@@ -56,6 +56,54 @@ main,
   font-size: 16px;
 }
 
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 var(--gap);
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* The Your fonts page: a wider column with one row per added font. */
+body.page {
+  width: auto;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  min-height: 48px;
+  overflow-wrap: anywhere;
+}
+
 #note {
   margin: 0;
   color: var(--muted);

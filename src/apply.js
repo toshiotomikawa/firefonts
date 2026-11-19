@@ -19,7 +19,27 @@
   // The value now applied, so a page that strips it from <html> gets it back.
   let current = "";
 
+  // Fonts the user added as files reach the page through the font loading API, which page rules can't block.
+  const added = new Set();
+  async function addFile(name) {
+    if (!name || added.has(name)) return;
+    added.add(name);
+    const data = (await browser.storage.local.get(FF.fileKey(name)))?.[FF.fileKey(name)];
+    if (!FF.isBuffer(data)) {
+      added.delete(name);
+      return;
+    }
+    try {
+      const face = new FontFace(name, data);
+      await face.load();
+      document.fonts.add(face);
+    } catch {
+      added.delete(name);
+    }
+  }
+
   function apply(value) {
+    addFile(FF.cleanName(value)).catch(() => {});
     const family = FF.cssFamily(value);
     current = family ? value : "";
     if (family) {
