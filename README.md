@@ -1,4 +1,4 @@
-# firefonts
+# Firefonts
 
 A Firefox extension that changes the font of any site you choose.
 

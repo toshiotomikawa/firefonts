@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: firefonts
+name: Firefonts
 description: Toolbar popup of a Firefox extension that changes the font of the sites you choose.
 colors:
   background: "#ffffff"
@@ -59,6 +59,10 @@ One toolbar popup (`src/popup.html`), the simple mode: a switch to change the fo
 ## Colors
 
 A neutral surface with one blue accent for the switch when on and for focus rings. The off track and the field border share one line colour with 3:1 contrast against the surface. Dark mode uses each `-dark` twin through `color-scheme: light dark` and `light-dark()`.
+
+## Icon
+
+`src/icon.svg`, one SVG for every size. A flame F wraps a purple globe, after the Firefox symbol without copying it. Colours come from Mozilla's Firefox palette: the globe runs #9059FF to #7543E3 to #3A0F6E, and the F runs #FFBD4F to #FF7139 to #FF3750 to #F5156C. A transparent gap separates the F from the globe, so the icon reads on light and dark toolbars down to 16px.
 
 ## Typography
 
