@@ -711,3 +711,14 @@ body.page {
     filter: invert(1);
   }
 }
+
+/* A box whose address can't be used yet (mistyped, or waiting for Enter to ask Firefox) gets a dashed outline. */
+.field[aria-invalid="true"] {
+  border-style: dashed;
+  border-color: var(--accent);
+}
+
+#scope {
+  margin: 0;
+  color: var(--muted);
+}

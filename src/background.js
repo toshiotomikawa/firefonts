@@ -43,6 +43,11 @@ async function sync() {
   let items = (await browser.storage.sync.get(null)) || {};
   try {
     items = await replaceDropped(await migrate(items));
+    const settled = FF.settle(items);
+    if (Object.keys(settled).length) {
+      await browser.storage.sync.set(settled);
+      items = { ...items, ...settled };
+    }
   } catch (error) {
     console.error("firefonts: could not move old settings", error);
   }
@@ -110,5 +115,13 @@ browser.permissions.onAdded.addListener((added) => {
 });
 browser.permissions.onRemoved.addListener(schedule);
 browser.storage.onChanged.addListener((changes, area) => {
-  if (area === "sync" && Object.keys(changes).some((k) => k.startsWith(FF.PREFIX) || k === "sites")) schedule();
+  if (area !== "sync") return;
+  const keys = Object.keys(changes);
+  if (keys.some((k) => k.startsWith(FF.PREFIX) || k === "sites" || k === FF.CHOSEN || k === FF.ALL)) schedule();
+  // A site listed again whose permission Firefox kept gets no permission event, so its open tabs are done here.
+  const listed = keys.filter((k) => k.startsWith(FF.PREFIX) && changes[k].oldValue === undefined && changes[k].newValue !== undefined);
+  const origins = listed.map((k) => FF.patternFor(k.slice(FF.PREFIX.length))).filter(Boolean);
+  Promise.all(origins.map((origin) => browser.permissions.contains({ origins: [origin] }).then((granted) => granted && origin)))
+    .then((granted) => applyOpen(granted.filter(Boolean)))
+    .catch((error) => console.error("firefonts:", error));
 });

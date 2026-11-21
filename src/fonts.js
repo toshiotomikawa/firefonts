@@ -74,6 +74,7 @@ function fill() {
         remove.tabIndex = -1;
         remove.title = `Remove ${name}`;
         remove.setAttribute("aria-hidden", "true");
+        row.setAttribute("aria-description", "Press Delete to remove");
         remove.append(rowTemplate.content.querySelector(".field-action svg").cloneNode(true));
         row.append(remove);
       }
@@ -126,9 +127,10 @@ async function removeFont(name) {
   const users = Object.keys(items).filter((key) => (key === FF.CHOSEN || key.startsWith(FF.PREFIX)) && FF.cleanName(items[key]) === name);
   if (users.length) await browser.storage.sync.set(Object.fromEntries(users.map((key) => [key, FF.DEFAULT])));
   showSites();
-  open.removable = open.removable.filter((own) => own !== name);
   await show();
   if (!open) return;
+  open.removable = open.removable.filter((own) => own !== name);
+  if (open.current === name) open.current = FF.DEFAULT;
   fill();
   setActive(Math.min(active, fontNames.length - 1));
 }
@@ -312,7 +314,10 @@ async function faviconFor(host) {
     const page = new DOMParser().parseFromString(await response.text(), "text/html");
     for (const link of page.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')) {
       const href = link.getAttribute("href");
-      if (href) candidates.push(new URL(href, response.url).href);
+      if (!href) continue;
+      const url = new URL(href, response.url);
+      // Only icons on public https addresses: never plain http, an IP address or a local name.
+      if (url.protocol === "https:" && FF.validHost(url.hostname) && url.hostname.includes(".") && !/^[\d.]+$/.test(url.hostname)) candidates.push(url.href);
     }
   } catch {}
   candidates.push(`https://${host}/favicon.ico`);
@@ -387,8 +392,10 @@ function ordered(hosts, order) {
   return [...known, ...hosts.filter((host) => !known.includes(host)).sort()];
 }
 
-const saveOrder = () =>
-  browser.storage.sync.set({ [ORDER]: [...sites.children].map((row) => row.dataset.host) }).catch((error) => console.error("firefonts:", error));
+// The order is one setting, so past a few hundred sites it can outgrow sync's 8 KB per setting; the sites are
+// kept regardless, and those beyond the saved order follow A to Z.
+const saveOrder = (order = [...sites.children].map((row) => row.dataset.host)) =>
+  browser.storage.sync.set({ [ORDER]: order }).catch((error) => console.error("firefonts: order not saved", error));
 
 // Asks Firefox for a site; false when it is refused, or asked outside a click or key press.
 async function allow(host) {
@@ -399,7 +406,8 @@ async function allow(host) {
   }
 }
 
-async function showSites() {
+// Draws the websites list; `focus` names the site whose box takes the focus afterwards.
+async function showSites(focus) {
   const items = await browser.storage.sync.get(null);
   const fontsBySite = FF.sitesFrom(items);
   allToggle.checked = FF.allSites(items);
@@ -426,16 +434,17 @@ async function showSites() {
         handle.addEventListener("pointerdown", (event) => drag(event, row));
         handle.addEventListener("keydown", (event) => moveByKey(event, row));
         editable(row.querySelector("input"), host);
-        showIcon(row, host);
-        // A site added on another device, or taken back in Firefox's settings, waits for Firefox's permission.
+        // A site added on another device, or taken back in Firefox's settings, waits for Firefox's permission,
+        // and isn't contacted for its icon until then.
         const allowButton = row.querySelector(".allow");
         allowButton.setAttribute("aria-label", `Allow ${host}`);
         browser.permissions.contains({ origins: [FF.patternFor(host)] }).then((granted) => {
           allowButton.hidden = granted;
           row.classList.toggle("waiting", !granted);
+          if (granted) showIcon(row, host);
         });
         allowButton.addEventListener("click", async () => {
-          if (await allow(host)) showSites();
+          if (await allow(host)) showSites(host);
         });
         const remove = row.querySelector(".field-action");
         remove.setAttribute("aria-label", `Remove ${host}`);
@@ -443,16 +452,21 @@ async function showSites() {
         remove.addEventListener("click", async () => {
           await browser.storage.sync.remove(FF.keyFor(host));
           await browser.storage.local.remove([`icon:${host}`, `tone:${host}`]);
+          const next = row.nextElementSibling || row.previousElementSibling;
           row.remove();
+          (next ? next.querySelector("input") : siteField).focus();
           await saveOrder();
         });
         return row;
       }),
   );
+  if (focus) sites.querySelector(`[data-host="${CSS.escape(focus)}"] input`)?.focus();
 }
 
 // A website's box: shown short ("youtube.com"), and the full address while focused, with the caret kept where it
-// was clicked. Editing it and pressing Enter (or leaving the box) changes the site; Escape puts it back.
+// was clicked. Editing it and pressing Enter (or leaving the box) changes the site; Escape puts it back. Firefox
+// asks for a new site only on a key press or click, so leaving the box for a site it hasn't allowed keeps the
+// typed address in the box, marked, until Enter asks for it.
 function editable(field, host) {
   const full = `https://${host}`;
   const short = host.replace(/^www\./, "");
@@ -460,6 +474,8 @@ function editable(field, host) {
   field.value = short;
   field.setAttribute("aria-label", host);
   let done = false;
+  // An address typed for a site Firefox hasn't allowed yet, shown until Enter asks for it or Escape drops it.
+  let draft = null;
   // Where in the short text a click landed, read before the text grows, and put back once the click is over.
   let clicked = null;
   field.addEventListener("pointerdown", (event) => {
@@ -468,50 +484,66 @@ function editable(field, host) {
   });
   field.addEventListener("focus", () => {
     done = false;
-    field.value = full;
-    if (clicked === null) return field.setSelectionRange(full.length, full.length);
+    field.value = draft ?? full;
+    if (clicked === null || draft !== null) return field.setSelectionRange(field.value.length, field.value.length);
     const at = Math.min(clicked, short.length) + hidden;
     clicked = null;
     field.addEventListener("pointerup", () => field.setSelectionRange(at, at), { once: true });
     field.setSelectionRange(at, at);
   });
-  const finish = async () => {
+  const finish = async (asking) => {
     if (done) return;
     done = true;
-    const changed = field.value.trim() !== full && (await renameSite(host, field.value));
-    if (!changed) {
+    const typed = field.value;
+    const result = typed.trim() !== full && (await renameSite(host, typed, asking));
+    draft = result === "ask" ? typed : null;
+    if (draft !== null) {
+      field.value = draft;
+      field.setAttribute("aria-invalid", "true");
+      field.title = "Press Enter to allow this site";
+    } else if (!result) {
       field.value = document.activeElement === field ? full : short;
       field.removeAttribute("aria-invalid");
+      field.removeAttribute("title");
     }
   };
   field.addEventListener("keydown", (event) => {
     // Enter that ends a word being composed (Chinese, Japanese, Korean input) isn't a submit.
-    if (event.key === "Enter" && !event.isComposing) finish().then(() => field.blur());
+    if (event.key === "Enter" && !event.isComposing) {
+      done = false;
+      finish(true).then(() => draft === null && field.blur());
+    }
     if (event.key === "Escape") {
+      draft = null;
+      field.removeAttribute("aria-invalid");
+      field.removeAttribute("title");
       field.value = full;
       field.blur();
     }
   });
   field.addEventListener("blur", async () => {
-    await finish();
-    if (document.activeElement !== field) field.value = short;
+    await finish(false);
+    if (document.activeElement !== field && draft === null) field.value = short;
   });
   field.addEventListener("input", () => field.removeAttribute("aria-invalid"));
 }
 
-// Moves a site's font to a new address, in the same place in the list. False when the address isn't usable.
-async function renameSite(host, text) {
+// Moves a site's font to a new address, in the same place in the list. False when the address isn't usable, and
+// "ask" when Firefox must be asked for it but `asking` is false (not from a key press or click).
+async function renameSite(host, text, asking) {
   const next = hostFrom(text);
   const taken = [...sites.children].some((row) => row.dataset.host === next);
   if (!FF.validHost(next) || taken) return false;
-  if (!(await allow(next))) return false;
+  if (!asking && !(await browser.permissions.contains({ origins: [FF.patternFor(next)] }))) return "ask";
+  if (asking && !(await allow(next))) return false;
   const key = FF.keyFor(host);
   const font = (await browser.storage.sync.get(key))[key] || (await chosenFont());
   const order = [...sites.children].map((row) => (row.dataset.host === host ? next : row.dataset.host));
-  await browser.storage.sync.set({ [FF.keyFor(next)]: font, [ORDER]: order });
+  await browser.storage.sync.set({ [FF.keyFor(next)]: font });
   await browser.storage.sync.remove(key);
+  await saveOrder(order);
   await browser.storage.local.remove([`icon:${host}`, `tone:${host}`]);
-  showSites();
+  await showSites(next);
   return true;
 }
 
@@ -523,7 +555,8 @@ async function addSite() {
   // Asked straight from the click or key press, as Firefox requires.
   if (!(await allow(host))) return;
   const order = [...sites.children].map((row) => row.dataset.host).filter((known) => known !== host);
-  await browser.storage.sync.set({ [FF.keyFor(host)]: await chosenFont(), [ORDER]: [...order, host] });
+  await browser.storage.sync.set({ [FF.keyFor(host)]: await chosenFont() });
+  await saveOrder([...order, host]);
   siteField.value = "";
   siteField.removeAttribute("aria-invalid");
   showSites();
@@ -537,6 +570,13 @@ siteField.addEventListener("keydown", (event) => {
 siteField.addEventListener("input", () => siteField.removeAttribute("aria-invalid"));
 
 showSites();
+
+// Changes made in the popup or on another device show when the page is looked at again.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || open) return;
+  show();
+  showSites();
+});
 
 // Moving rows. Every row that changes place slides there from where it was.
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;

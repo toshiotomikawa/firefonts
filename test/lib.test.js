@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, everywhere, replacements, allSites, BUNDLED, DEFAULT } = require("../src/lib.js");
+const { cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, everywhere, replacements, settle, allSites, BUNDLED, DEFAULT } = require("../src/lib.js");
 
 test("trims and collapses spaces", () => {
   assert.equal(cleanName("  Times   New Roman "), "Times New Roman");
@@ -73,4 +73,18 @@ test("moves sites off fonts no longer bundled, unless the user added that font",
 test("bundles the default font and lists the bundled fonts A to Z", () => {
   assert.ok(BUNDLED.includes(DEFAULT));
   assert.deepEqual(BUNDLED, [...BUNDLED].sort((a, b) => a.localeCompare(b)));
+});
+
+test("coming from 0.1.3, sites with one shared font make it the chosen font", () => {
+  assert.deepEqual(settle({ "site:a.com": "Lora", "site:b.com": "Lora" }), { font: "Lora" });
+});
+
+test("coming from 0.1.3, sites with different fonts keep them", () => {
+  assert.deepEqual(settle({ "site:a.com": "Lora", "site:b.com": "Inter" }), { "all-sites": false });
+  assert.deepEqual(settle({}), {});
+});
+
+test("with all sites on, a site that differs takes the chosen font; with it off, nothing changes", () => {
+  assert.deepEqual(settle({ font: "Lora", "site:a.com": "Lora", "site:b.com": "Inter" }), { "site:b.com": "Lora" });
+  assert.deepEqual(settle({ font: "Lora", "all-sites": false, "site:b.com": "Inter" }), {});
 });

@@ -139,7 +139,22 @@
     return changed;
   }
 
-  const api = { BUNDLED, DEFAULT, REPLACED, CHOSEN, ALL, allSites, everywhere, replacements, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, FILE, fileKey, filesFrom, isBuffer };
+  // The settings that keep "one font for all sites" true. Coming from a version without it, sites that all share
+  // one font make it the chosen font, and sites with different fonts keep them (all sites off). Otherwise, with all
+  // sites on, any site that differs (added on another device, say) takes the chosen font.
+  function settle(items) {
+    const sites = sitesFrom(items);
+    const fonts = [...new Set(Object.values(sites))];
+    if (items[ALL] === undefined && items[CHOSEN] === undefined) {
+      if (fonts.length === 1) return { [CHOSEN]: fonts[0] };
+      return fonts.length ? { [ALL]: false } : {};
+    }
+    const chosen = cleanName(items[CHOSEN]);
+    if (!allSites(items) || !chosen) return {};
+    return Object.fromEntries(Object.keys(sites).filter((host) => sites[host] !== chosen).map((host) => [keyFor(host), chosen]));
+  }
+
+  const api = { BUNDLED, DEFAULT, REPLACED, CHOSEN, ALL, allSites, everywhere, replacements, settle, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, FILE, fileKey, filesFrom, isBuffer };
   root.FF = api;
   if (typeof module !== "undefined") module.exports = api;
 })(globalThis);

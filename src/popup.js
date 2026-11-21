@@ -169,6 +169,7 @@ async function init() {
   $("host").textContent = host.replace(/^www\./, "");
   const items = (await browser.storage.sync.get(null)) || {};
   allMode = FF.allSites(items);
+  $("scope").hidden = !allMode;
   saved = FF.cleanName(items[FF.keyFor(host)]);
   font.value = saved || FF.cleanName(items[FF.CHOSEN]) || FF.DEFAULT;
   if (saved) {

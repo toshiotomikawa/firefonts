@@ -113,11 +113,11 @@ Under 840px the settings page keeps one column that fills the window less the on
 ## Components
 
 - **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for that site only. Dimmed until the popup has read the site's setting.
-- **Popup font field:** set in the typed font, starting at the site's font or the chosen one. With "Apply this font to all websites" on, a font saved here becomes the chosen font for every website. An empty or missing font shows a note and the switch won't turn on.
+- **Popup font field:** set in the typed font, starting at the site's font or the chosen one. With "Apply this font to all websites" on, a font saved here becomes the chosen font for every website. A line under it says so. An empty or missing font shows a note and the switch won't turn on.
 - **Font chooser:** a field showing the chosen font in itself. A click opens the font list over the page with the current font exactly where the button was; arrow keys, Home, End, Page Up and Down, typing and Enter work from the button, Escape closes it unchanged.
 - **Font list:** every bundled and added font, A to Z, eight rows at a time, each drawn in itself and ticked when current. An added font shows a cross in place of the tick while pointed at, and Delete removes it.
 - **Apply to all switch:** on by default, giving the chosen font to every website; off, each website gets its own font chooser under its box.
-- **Website box:** the site's favicon (or a globe), its short address, and the full address while editing. Enter or leaving the box renames the site; Escape puts it back. A drag handle in the margin reorders the list, and the arrow keys do the same. A site Firefox hasn't allowed yet is faded, with an Allow button under it.
+- **Website box:** the site's favicon (or a globe), its short address, and the full address while editing. Enter or leaving the box renames the site; Escape puts it back. Firefox asks for a new site only on a key press, so leaving the box for a site it hasn't allowed keeps the typed address with a dashed outline until Enter. A drag handle in the margin reorders the list, and the arrow keys do the same. A site Firefox hasn't allowed yet is faded, with an Allow button under it, and its icon isn't fetched until then.
 - **Icon button:** 48px round, one 24px icon in the accent colour, named by its aria-label and tooltip, tinted 10% on hover.
 - **Blocked page:** pages Firefox protects show one sentence instead of the popup's controls.
 
