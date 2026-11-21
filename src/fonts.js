@@ -485,7 +485,8 @@ function editable(field, host) {
     }
   };
   field.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") finish().then(() => field.blur());
+    // Enter that ends a word being composed (Chinese, Japanese, Korean input) isn't a submit.
+    if (event.key === "Enter" && !event.isComposing) finish().then(() => field.blur());
     if (event.key === "Escape") {
       field.value = full;
       field.blur();
@@ -531,7 +532,7 @@ async function addSite() {
 
 document.getElementById("add-site").addEventListener("click", addSite);
 siteField.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") addSite();
+  if (event.key === "Enter" && !event.isComposing) addSite();
 });
 siteField.addEventListener("input", () => siteField.removeAttribute("aria-invalid"));
 

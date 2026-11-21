@@ -1,97 +1,128 @@
 ---
 version: alpha
 name: Firefonts
-description: Toolbar popup of a Firefox extension that changes the font of the sites you choose.
+description: Toolbar popup and settings page of a Firefox extension that changes the font of the sites you choose.
 colors:
   background: "#ffffff"
-  text: "#1b1b1f"
+  text: "#000000"
   muted: "#5e5e66"
-  line: "#74747e"
-  primary: "#0b57d0"
+  line: "#92929a"
+  accent: "#1a1a1a"
   knob: "#ffffff"
   background-dark: "#1f1f23"
-  text-dark: "#ececf1"
+  text-dark: "#ffffff"
   muted-dark: "#a8a8b3"
-  line-dark: "#8e8e99"
-  primary-dark: "#a8c7fa"
+  line-dark: "#6a6a72"
+  accent-dark: "#e6e6e6"
   knob-dark: "#1f1f23"
 typography:
   body:
-    fontFamily: Google Sans, system-ui, sans-serif
+    fontFamily: Allo, system-ui, sans-serif
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.5
+  heading:
+    fontFamily: Allo, system-ui, sans-serif
+    fontSize: 16px
+    fontWeight: 700
+    lineHeight: 1.5
+    letterSpacing: 0.06em
+  title:
+    fontFamily: Allo, system-ui, sans-serif
+    fontSize: 22px
+    fontWeight: 800
+    lineHeight: 1.5
 rounded:
   md: 8px
-  full: 16px
+  field: 12px
+  full: 9999px
 spacing:
+  line: 24px
   gap: 12px
-  page: 16px
+  page: 24px
+  field: 36px
 components:
   row:
     typography: "{typography.body}"
+    textColor: "{colors.text}"
+    height: 36px
+  field:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
-    height: 48px
-  font-field:
+    rounded: "{rounded.field}"
+    height: 36px
+    padding: 0 6px
+  popup-field:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text}"
     rounded: "{rounded.md}"
     height: 48px
     padding: 0 12px
+  font-chooser:
+    textColor: "{colors.accent}"
+    rounded: "{rounded.field}"
+    height: 36px
   note:
     textColor: "{colors.muted}"
   switch:
     backgroundColor: "{colors.line}"
     rounded: "{rounded.full}"
-    width: 52px
-    height: 32px
+    width: 40px
+    height: 24px
+  switch-on:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.knob}"
+    rounded: "{rounded.full}"
   button:
-    textColor: "{colors.primary}"
+    textColor: "{colors.accent}"
     rounded: "{rounded.md}"
     height: 48px
     padding: 0 12px
   icon-button:
-    textColor: "{colors.primary}"
+    textColor: "{colors.accent}"
     rounded: "{rounded.full}"
     size: 48px
-  switch-on:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.knob}"
-    rounded: "{rounded.full}"
 ---
 
 ## Overview
 
-One toolbar popup (`src/popup.html`), the simple mode: a switch to change the font on the open site, and the font's name. A second page, Your fonts (`src/fonts.html`), opens in a tab to add font files, since a file picker would close the popup. It follows the system light or dark theme.
+Two surfaces. The toolbar popup (`src/popup.html`) is the quick one: a switch to change the font on the open site and the font's name. The settings page (`src/fonts.html`) opens in a tab, because a file picker would close the popup: choose the font, add font files, preview a sentence, and manage the list of websites. Both follow the system theme, or the theme picked with the button in the settings page's footer.
 
 ## Colors
 
-A neutral surface with one blue accent for the switch when on and for focus rings. The off track and the field border share one line colour with 3:1 contrast against the surface. Dark mode uses each `-dark` twin through `color-scheme: light dark` and `light-dark()`.
+Graphite and paper: the accent is graphite (10% brightness) in the light theme and paper (90%) in the dark one, with no blue. Text is pure black, or white in the dark theme; text inside a font selector takes the accent. Field outlines are as light as they can be while keeping 3:1 contrast. Each colour has a `-dark` twin, applied through `color-scheme` and `light-dark()`.
+
+Behind the settings page, Firefox's brand colours glow faintly from the window's edges (yellow and orange at the left, pink at the top right, purple and violet at the bottom), stronger in the dark theme, under a triangular grid of faint dots exactly one line apart (`src/depth.js`).
 
 ## Icon
 
-`src/icon.svg`, one SVG for every size. A flame F wraps a purple globe, after the Firefox symbol without copying it. Colours come from Mozilla's Firefox palette: the globe runs #9059FF to #7543E3 to #3A0F6E, and the F runs #FFBD4F to #FF7139 to #FF3750 to #F5156C. A transparent gap separates the F from the globe, so the icon reads on light and dark toolbars down to 16px.
+`src/icon.svg`, one SVG for every size, plus `src/icon-64.png` for the settings tab. A flame F wraps a purple globe, after the Firefox symbol without copying it. Colours come from Mozilla's Firefox palette: the globe runs #9059FF to #7543E3 to #3A0F6E, and the F runs #FFBD4F to #FF7139 to #FF3750 to #F5156C. A transparent gap separates the F from the globe, so the icon reads on light and dark toolbars down to 16px.
 
 ## Typography
 
-Google Sans at one size, 16px, weight 400; the Your fonts heading uses weight 700 at the same size. The font field previews what is typed in that font.
+Allo (Josh Puckett, OFL) with stylistic set 2, in three sizes only: 16px body, 16px bold uppercase headings, and the 22px extra-bold page title. Anything showing a font sample (the font field, the font list, the preview sentence) draws that font as it comes, without Allo's stylistic set.
 
 ## Layout
 
-A 280px column with 16px padding and 12px between items: the switch row, the font field, a note that only takes space when it has something to say, and the Your fonts button. Every control is 48px tall. The Your fonts page uses the same tokens in a centred column up to 560px: the heading with its add icon on the right, "Choose your font:", and one 48px row per font.
+Everything is measured in lines: one line is 24px, the height of a line of body text. Gaps are half a line, the page margin one line, and settings fields a line and a half (36px), with their icons centred in a square of that height. Everything is symmetric.
+
+The popup is a 288px column (12 lines). The settings page is a centred column up to 576px (24 lines) with three numbered sections, Fonts, Preview and Websites, divided by faint rules, and a footer with the GitHub and theme buttons held at the bottom of the window.
+
+Under 840px the settings page keeps one column that fills the window less the one-line margin. Touch screens show the drag handles all the time, since nothing can point at a row.
 
 ## Components
 
-- **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for access to that site only. The switch is dimmed to half opacity until the popup has read the site's setting.
-- **Font field:** a text field set in the typed font. An empty or missing font shows "Type a font name" or "Not found on this computer"; the switch won't turn on, and if it is already on the note adds which font is still in use.
-- **Suggestions:** the field offers the user's own fonts first, then the 34 bundled ones.
-- **Button:** text in the accent colour on a clear background, tinted 10% on hover; used for Your fonts, Add font files and Remove.
-- **Icon button:** a 48px round button with one 24px icon in the accent colour, named by its aria-label and tooltip; tinted 10% on hover, where the icon turns a quarter (no motion with reduced motion). Icon buttons are preferred over text buttons. The plus beside the Your fonts heading adds font files.
-- **Font row:** each added font's name, drawn in that font, with a Remove button.
-- **Blocked page:** pages Firefox protects show one sentence instead of the controls.
+- **Switch row:** "Change font on <site>"; the whole row is the switch's label. Turning it on asks Firefox for that site only. Dimmed until the popup has read the site's setting.
+- **Popup font field:** set in the typed font, starting at the site's font or the chosen one. With "Apply this font to all websites" on, a font saved here becomes the chosen font for every website. An empty or missing font shows a note and the switch won't turn on.
+- **Font chooser:** a field showing the chosen font in itself. A click opens the font list over the page with the current font exactly where the button was; arrow keys, Home, End, Page Up and Down, typing and Enter work from the button, Escape closes it unchanged.
+- **Font list:** every bundled and added font, A to Z, eight rows at a time, each drawn in itself and ticked when current. An added font shows a cross in place of the tick while pointed at, and Delete removes it.
+- **Apply to all switch:** on by default, giving the chosen font to every website; off, each website gets its own font chooser under its box.
+- **Website box:** the site's favicon (or a globe), its short address, and the full address while editing. Enter or leaving the box renames the site; Escape puts it back. A drag handle in the margin reorders the list, and the arrow keys do the same. A site Firefox hasn't allowed yet is faded, with an Allow button under it.
+- **Icon button:** 48px round, one 24px icon in the accent colour, named by its aria-label and tooltip, tinted 10% on hover.
+- **Blocked page:** pages Firefox protects show one sentence instead of the popup's controls.
 
 ## Do's and Don'ts
 
-- Do keep the simple mode to one switch and one field.
-- Don't add per-element choices here; they belong in the advanced mode.
+- Do keep the popup to one switch and one field.
+- Do keep every size and space a multiple or simple fraction of a line, and keep the three type sizes.
+- Don't use blue or any accent other than graphite and paper.

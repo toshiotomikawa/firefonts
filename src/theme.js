@@ -15,6 +15,7 @@
   const apply = (theme) => {
     document.documentElement.style.colorScheme = theme === "system" ? "" : theme;
     document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="color-scheme"]')?.setAttribute("content", theme === "system" ? "light dark" : theme);
     const button = document.getElementById("theme");
     if (!button) return;
     button.setAttribute("aria-label", names[theme]);
