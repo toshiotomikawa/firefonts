@@ -314,7 +314,7 @@ async function faviconFor(host) {
     const page = new DOMParser().parseFromString(await response.text(), "text/html");
     for (const link of page.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')) {
       const href = link.getAttribute("href");
-      if (!href) continue;
+      if (!href || !URL.canParse(href, response.url)) continue;
       const url = new URL(href, response.url);
       // Only icons on public https addresses: never plain http, an IP address or a local name.
       if (url.protocol === "https:" && FF.validHost(url.hostname) && url.hostname.includes(".") && !/^[\d.]+$/.test(url.hostname)) candidates.push(url.href);
@@ -496,11 +496,11 @@ function editable(field, host) {
     done = true;
     const typed = field.value;
     const result = typed.trim() !== full && (await renameSite(host, typed, asking));
-    draft = result === "ask" ? typed : null;
+    draft = result === "ask" || result === "invalid" ? typed : null;
     if (draft !== null) {
       field.value = draft;
       field.setAttribute("aria-invalid", "true");
-      field.title = "Press Enter to allow this site";
+      field.title = result === "ask" ? "Press Enter to allow this site" : "Not a website address, or already listed";
     } else if (!result) {
       field.value = document.activeElement === field ? full : short;
       field.removeAttribute("aria-invalid");
@@ -529,11 +529,11 @@ function editable(field, host) {
 }
 
 // Moves a site's font to a new address, in the same place in the list. False when the address isn't usable, and
-// "ask" when Firefox must be asked for it but `asking` is false (not from a key press or click).
+// "invalid" when it names no usable or new site, "ask" when Firefox must be asked for it but `asking` is false (not from a key press or click).
 async function renameSite(host, text, asking) {
   const next = hostFrom(text);
   const taken = [...sites.children].some((row) => row.dataset.host === next);
-  if (!FF.validHost(next) || taken) return false;
+  if (!FF.validHost(next) || taken) return next === host ? false : "invalid";
   if (!asking && !(await browser.permissions.contains({ origins: [FF.patternFor(next)] }))) return "ask";
   if (asking && !(await allow(next))) return false;
   const key = FF.keyFor(host);
