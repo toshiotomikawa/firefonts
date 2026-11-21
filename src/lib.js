@@ -1,43 +1,45 @@
 "use strict";
 // Pure helpers shared by the popup, the page script, the background script and the tests.
 (function (root) {
-  // Fonts shipped with the extension, always available.
+  // Fonts shipped with the extension, always available, A to Z.
   const BUNDLED = [
-    "Google Sans",
-    "Inter",
-    "Roboto",
-    "Open Sans",
-    "Lato",
-    "Montserrat",
-    "Poppins",
-    "Nunito",
-    "DM Sans",
-    "Work Sans",
-    "Source Sans 3",
-    "Figtree",
     "Atkinson Hyperlegible Next",
-    "Lexend",
-    "Raleway",
-    "Merriweather",
-    "Lora",
-    "Playfair Display",
-    "EB Garamond",
-    "Libre Baskerville",
-    "Source Serif 4",
-    "Literata",
-    "Roboto Slab",
-    "JetBrains Mono",
-    "Fira Code",
-    "Source Code Pro",
-    "IBM Plex Mono",
-    "Roboto Mono",
-    "Oswald",
     "Bebas Neue",
     "Caveat",
-    "Dancing Script",
-    "Pacifico",
     "Comic Neue",
+    "DM Sans",
+    "EB Garamond",
+    "Figtree",
+    "Fira Code",
+    "Google Sans",
+    "IBM Plex Mono",
+    "Inter",
+    "JetBrains Mono",
+    "Lato",
+    "Lexend",
+    "Libre Baskerville",
+    "Literata",
+    "Lora",
+    "Merriweather",
+    "Montserrat",
+    "Nunito",
+    "Open Sans",
+    "Oswald",
+    "Pacifico",
+    "Playfair Display",
+    "Poppins",
+    "Raleway",
+    "Roboto",
+    "Roboto Slab",
+    "Source Code Pro",
+    "Source Sans 3",
+    "Source Serif 4",
+    "Work Sans",
   ];
+  // The font a new site starts with until the user chooses one.
+  const DEFAULT = "Google Sans";
+  // Fonts earlier versions bundled, and the bundled font that now takes each one's place.
+  const REPLACED = { "dancing script": "Caveat", "roboto mono": "JetBrains Mono" };
   // CSS generic families: always available, and written without quotes.
   const GENERIC = [
     "serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui", "math", "emoji", "fangsong",
@@ -113,7 +115,31 @@
     return sites;
   }
 
-  const api = { BUNDLED, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, FILE, fileKey, filesFrom, isBuffer };
+  // The font the user chose, and whether it goes to every listed site (the default) or each site keeps its own.
+  const CHOSEN = "font";
+  const ALL = "all-sites";
+  const allSites = (items) => items?.[ALL] !== false;
+
+  // The settings that give the chosen font to every listed site, plus any hosts about to be added.
+  function everywhere(items, name, more = []) {
+    const hosts = [...Object.keys(sitesFrom(items)), ...more];
+    return { [CHOSEN]: name, ...Object.fromEntries(hosts.map((host) => [keyFor(host), name])) };
+  }
+
+  // The settings that move the chosen font and every site off a font that is no longer bundled, unless the user
+  // added a file of that name.
+  function replacements(items, files = {}) {
+    const own = Object.keys(files).map((name) => name.toLowerCase());
+    const changed = {};
+    for (const [key, value] of Object.entries(items || {})) {
+      if (key !== CHOSEN && !key.startsWith(PREFIX)) continue;
+      const font = cleanName(value).toLowerCase();
+      if (Object.hasOwn(REPLACED, font) && !own.includes(font)) changed[key] = REPLACED[font];
+    }
+    return changed;
+  }
+
+  const api = { BUNDLED, DEFAULT, REPLACED, CHOSEN, ALL, allSites, everywhere, replacements, GENERIC, RESTRICTED, PREFIX, cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, FILE, fileKey, filesFrom, isBuffer };
   root.FF = api;
   if (typeof module !== "undefined") module.exports = api;
 })(globalThis);

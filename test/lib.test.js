@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom } = require("../src/lib.js");
+const { cleanName, cssFamily, validHost, patternFor, keyFor, sitesFrom, everywhere, replacements, allSites, BUNDLED, DEFAULT } = require("../src/lib.js");
 
 test("trims and collapses spaces", () => {
   assert.equal(cleanName("  Times   New Roman "), "Times New Roman");
@@ -52,4 +52,25 @@ test("reads each site's font from its own key and skips anything malformed", () 
   };
   assert.deepEqual(sitesFrom(items), { "a.com": "Inter" });
   assert.deepEqual(sitesFrom(null), {});
+});
+
+test("gives the chosen font to every listed site and to sites about to be added", () => {
+  const items = { "site:a.com": "Lora", "site:b.com": "Inter", other: 1 };
+  assert.deepEqual(everywhere(items, "Caveat", ["c.com"]), { font: "Caveat", "site:a.com": "Caveat", "site:b.com": "Caveat", "site:c.com": "Caveat" });
+});
+
+test("applies to all sites unless the user turned it off", () => {
+  assert.equal(allSites({}), true);
+  assert.equal(allSites({ "all-sites": false }), false);
+});
+
+test("moves sites off fonts no longer bundled, unless the user added that font", () => {
+  const items = { font: "Roboto Mono", "site:a.com": "dancing script", "site:b.com": "Lora", "site:c.com": "Roboto Mono" };
+  assert.deepEqual(replacements(items), { font: "JetBrains Mono", "site:a.com": "Caveat", "site:c.com": "JetBrains Mono" });
+  assert.deepEqual(replacements(items, { "Roboto Mono": new ArrayBuffer(1) }), { "site:a.com": "Caveat" });
+});
+
+test("bundles the default font and lists the bundled fonts A to Z", () => {
+  assert.ok(BUNDLED.includes(DEFAULT));
+  assert.deepEqual(BUNDLED, [...BUNDLED].sort((a, b) => a.localeCompare(b)));
 });

@@ -30,10 +30,19 @@ async function migrate(items) {
   return { ...items, ...moved };
 }
 
+// Sites set to a font the extension no longer ships move to the bundled font that replaced it.
+async function replaceDropped(items) {
+  const files = FF.filesFrom(await browser.storage.local.get(null));
+  const changed = FF.replacements(items, files);
+  if (!Object.keys(changed).length) return items;
+  await browser.storage.sync.set(changed);
+  return { ...items, ...changed };
+}
+
 async function sync() {
   let items = (await browser.storage.sync.get(null)) || {};
   try {
-    items = await migrate(items);
+    items = await replaceDropped(await migrate(items));
   } catch (error) {
     console.error("firefonts: could not move old settings", error);
   }

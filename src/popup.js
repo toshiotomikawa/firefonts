@@ -13,6 +13,8 @@ let saved = "";
 let styled = false;
 // Fonts the user added as files.
 const userFonts = [];
+// With "Apply this font to all websites" on (the default), the font here is the one every listed site uses.
+let allMode = true;
 
 // True when this computer can draw the font, judged by text width against generic fonts.
 function available(name) {
@@ -45,7 +47,9 @@ function save(enabled) {
   const key = FF.keyFor(host);
   const value = FF.cleanName(font.value);
   queue = queue.then(async () => {
-    await (enabled ? browser.storage.sync.set({ [key]: value }) : browser.storage.sync.remove(key));
+    if (!enabled) await browser.storage.sync.remove(key);
+    else if (allMode) await browser.storage.sync.set(FF.everywhere(await browser.storage.sync.get(null), value, [host]));
+    else await browser.storage.sync.set({ [key]: value });
     saved = enabled ? value : "";
   });
   return queue.catch((error) => {
@@ -151,7 +155,8 @@ async function init() {
     } catch {}
   }
   // The user's own fonts and the ones that ship with the extension are offered as suggestions.
-  $("bundled").append(...[...userFonts, ...FF.BUNDLED].map((name) => new Option(name)));
+  const names = [...new Set([...userFonts, ...FF.BUNDLED])].sort((a, b) => a.localeCompare(b));
+  $("bundled").append(...names.map((name) => new Option(name)));
   [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   try {
     const url = new URL(tab?.url);
@@ -162,10 +167,11 @@ async function init() {
     return;
   }
   $("host").textContent = host.replace(/^www\./, "");
-  const key = FF.keyFor(host);
-  saved = FF.cleanName((await browser.storage.sync.get(key))?.[key]);
+  const items = (await browser.storage.sync.get(null)) || {};
+  allMode = FF.allSites(items);
+  saved = FF.cleanName(items[FF.keyFor(host)]);
+  font.value = saved || FF.cleanName(items[FF.CHOSEN]) || FF.DEFAULT;
   if (saved) {
-    font.value = saved;
     try {
       on.checked = await browser.permissions.contains({ origins: [FF.patternFor(host)] });
     } catch {}

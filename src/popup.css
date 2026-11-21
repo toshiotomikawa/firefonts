@@ -1,21 +1,39 @@
 :root {
   color-scheme: light dark;
   --bg: light-dark(#ffffff, #1f1f23);
-  --text: light-dark(#1b1b1f, #ececf1);
+  /* Headings and body text: black (white in the dark theme). Text inside a font selector is graphite. */
+  --text: light-dark(#000000, #ffffff);
   --muted: light-dark(#5e5e66, #a8a8b3);
-  --line: light-dark(#74747e, #8e8e99);
-  --accent: light-dark(#0b57d0, #a8c7fa);
+  /* Outlines: as light as they can be while keeping the 3:1 contrast a field border needs. */
+  --line: light-dark(#92929a, #6a6a72);
+  /* Graphite (10% brightness), and paper (90%) in the dark theme. */
+  --accent: light-dark(#1a1a1a, #e6e6e6);
   --knob: light-dark(#ffffff, #1f1f23);
-  --gap: 12px;
-  --page: 16px;
+  /* Layout unit: one line of body text (16px at 1.5 line height). Spacing is a multiple or simple fraction of it. */
+  --u: 24px;
+  --gap: calc(var(--u) / 2);
+  --page: var(--u);
+  /* Settings fields: 1.5 lines tall; their icon is centred in a square of that size, and the text sits as far in as the icon. */
+  --field: calc(var(--u) * 1.5);
+  --field-icon: var(--u);
+  /* Favicons are solid pictures, so they look the same size as the line icons at three quarters of a line. */
+  --site-icon: calc(var(--u) * 0.75);
+  --field-inset: calc((var(--field) - var(--field-icon)) / 2);
 }
 
 body {
   margin: 0;
-  width: 280px;
+  width: calc(var(--u) * 12);
   background: var(--bg);
   color: var(--text);
-  font: 400 16px/1.5 "Google Sans", system-ui, sans-serif;
+  /* Set in Allo (Josh Puckett, OFL) with stylistic set 2, as on the Tomi ESL site. */
+  font: 400 16px/1.5 "Allo", system-ui, sans-serif;
+  font-feature-settings: "ss02";
+}
+
+/* The font field previews what is typed, drawn as the font comes. */
+#font {
+  font-feature-settings: normal;
 }
 
 main,
@@ -35,7 +53,7 @@ main,
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
-  min-height: 48px;
+  min-height: calc(var(--u) * 2);
   cursor: pointer;
 }
 
@@ -43,10 +61,12 @@ main,
   overflow-wrap: anywhere;
 }
 
-#font {
+#font,
+.field {
   box-sizing: border-box;
+  font-family: inherit;
   width: 100%;
-  height: 48px;
+  height: calc(var(--u) * 2);
   margin: 0;
   padding: 0 var(--gap);
   border: 1px solid var(--line);
@@ -54,13 +74,22 @@ main,
   background: var(--bg);
   color: var(--text);
   font-size: 16px;
+  transition: border-color 150ms ease;
+}
+
+/* The box under the pointer, or being typed in, takes the accent colour. */
+#font:hover,
+#font:focus,
+.field-box:hover .field,
+.field:focus {
+  border-color: var(--accent);
 }
 
 .button {
   display: inline-flex;
   align-items: center;
   justify-self: start;
-  min-height: 48px;
+  min-height: calc(var(--u) * 2);
   margin: 0;
   padding: 0 var(--gap);
   border: 0;
@@ -78,10 +107,11 @@ main,
 /* A round button holding one icon; its name is in aria-label and the tooltip. */
 .icon-button {
   display: inline-grid;
+  text-decoration: none;
   place-items: center;
   flex: none;
-  width: 48px;
-  height: 48px;
+  width: calc(var(--u) * 2);
+  height: calc(var(--u) * 2);
   margin: 0;
   padding: 0;
   border: 0;
@@ -97,13 +127,17 @@ main,
 }
 
 .icon-button svg {
-  width: 24px;
-  height: 24px;
-  fill: currentColor;
+  width: var(--u);
+  height: var(--u);
   transition: transform 200ms ease;
 }
 
-.icon-button:hover svg {
+/* Filled icons take the button's colour; outlined ones set their own fill and stroke. */
+.icon-button svg:not([fill]) {
+  fill: currentColor;
+}
+
+#add:hover svg {
   transform: rotate(90deg);
 }
 
@@ -113,6 +147,11 @@ main,
   }
 }
 
+/* A heading's button lines its icon up with the icons inside the fields below. */
+.head .icon-button {
+  margin-right: calc((var(--field) - var(--u) * 2) / 2);
+}
+
 .head {
   display: flex;
   align-items: center;
@@ -120,42 +159,240 @@ main,
   gap: var(--gap);
 }
 
-/* The Your fonts page: a wider column with one row per added font. */
+@font-face {
+  font-family: "Allo";
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/Allo-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Allo";
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/Allo-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Allo";
+  font-weight: 800;
+  font-display: swap;
+  src: url("fonts/Allo-ExtraBold.woff2") format("woff2");
+}
+
+/* The settings page: a wider column with one row per added font, and the footer held at the bottom. */
 body.page {
+  display: flex;
+  flex-direction: column;
   width: auto;
-  max-width: 560px;
+  max-width: calc(var(--u) * 24);
+  min-height: 100dvh;
   margin: 0 auto;
 }
 
-h1 {
+.foot {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap);
+  margin-top: auto;
+  padding: var(--page);
+}
+
+h1,
+h2 {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
 }
 
-#choose {
+h1,
+h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* The settings page numbers its sections: 1. Fonts, 2. Preview, 3. Websites. */
+body.page main {
+  counter-reset: section;
+}
+
+body.page main h2::before {
+  counter-increment: section;
+  content: counter(section) ". ";
+}
+
+/* The preview sentence: a field like the others, in the chosen font, that grows a line at a time with what is typed. */
+#sample {
+  height: auto;
+  min-height: var(--field);
+  /* One pixel less above and below makes room for the border, so one line is exactly a field's height. */
+  padding: calc(var(--field-inset) - 1px) var(--field-inset);
+  line-height: 1.5;
+  resize: none;
+  field-sizing: content;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+}
+
+#choose,
+.hint {
   margin: 0;
 }
 
-#list {
+/* A full line between the explanation and the boxes it explains (half from the grid gap, half here). */
+.hint {
+  margin-bottom: var(--gap);
+}
+
+/* Eight fonts show at a time; the rest scroll inside the list, and the page stays put. */
+.fonts {
   display: grid;
+  max-height: calc(var(--field) * 8);
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
   list-style: none;
 }
 
-#list li {
-  display: flex;
+/* The settings page's switch row sits on the same 1.5-line rhythm as the fields. */
+body.page .row {
+  min-height: var(--field);
+}
+
+/* With "Apply this font to all websites" off, each website shows its own font under its box, as a button that
+   opens the font list. */
+.font-pick {
+  display: none;
   align-items: center;
   justify-content: space-between;
-  gap: var(--gap);
-  min-height: 48px;
-  overflow-wrap: anywhere;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--field);
+  margin: 0;
+  padding: 0 var(--field-inset) 0 var(--field);
+  border: 0;
+  border-radius: var(--gap);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-feature-settings: normal;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.rows.each .font-pick {
+  display: flex;
+}
+
+/* A website Firefox hasn't allowed yet is faded, with a button to allow it under its box. */
+.site .allow {
+  display: flex;
+  min-height: var(--field);
+  padding-left: var(--field);
+}
+
+.site .allow[hidden] {
+  display: none;
+}
+
+.site.waiting .field-box {
+  opacity: 0.6;
+}
+
+.font-pick:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.font-pick svg {
+  width: var(--field-icon);
+  height: var(--field-icon);
+  color: var(--accent);
+}
+
+/* The font list opens over the page, with the current font right where the button was, so a pick is one short
+   move away. */
+body.page main {
+  position: relative;
+}
+
+#fontlist {
+  position: absolute;
+  z-index: 10;
+  box-sizing: border-box;
+  max-height: calc(var(--field) * 8 + 2px);
+  border: 1px solid var(--line);
+  border-radius: var(--gap);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fonts {
+    scroll-behavior: auto;
+  }
+
+  .font-pick {
+    transition: none;
+  }
+}
+
+/* The font list: one row per font, its name drawn in itself; the row under the pointer or the arrow keys is
+   shaded, and the current font is ticked. */
+.fonts [role="option"] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--field);
+  padding: 0 var(--field) 0 var(--field-inset);
+  cursor: pointer;
+}
+
+.fonts .active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* Allo's stylistic set 2 means something else in other fonts (Literata turns letters into symbols), so font
+   samples draw each font as it comes. */
+.fonts span,
+#sample {
+  font-feature-settings: normal;
+}
+
+.fonts span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fonts [aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  top: var(--field-inset);
+  right: var(--field-inset);
+  width: var(--field-icon);
+  height: var(--field-icon);
+  background: var(--accent);
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.0303 7.96967C18.3232 8.26256 18.3232 8.73744 18.0303 9.03033L11.0303 16.0303C10.7374 16.3232 10.2626 16.3232 9.96967 16.0303L5.96967 12.0303C5.67678 11.7374 5.67678 11.2626 5.96967 10.9697C6.26256 10.6768 6.73744 10.6768 7.03033 10.9697L10.5 14.4393L16.9697 7.96967C17.2626 7.67678 17.7374 7.67678 18.0303 7.96967Z"/></svg>') center / contain no-repeat;
+}
+
+/* A font the user added can be removed: its cross shows while the row is pointed at, in place of the tick. */
+.fonts .active .field-action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fonts .active:has(.field-action)::after {
+  display: none;
 }
 
 #note {
   margin: 0;
-  color: var(--muted);
 }
 
 /* Keeps the live region in place without leaving a gap. */
@@ -167,10 +404,11 @@ h1 {
   appearance: none;
   flex: none;
   position: relative;
-  width: 52px;
-  height: 32px;
+  /* One line tall. */
+  width: 40px;
+  height: var(--u);
   margin: 0;
-  border-radius: 16px;
+  border-radius: calc(var(--u) / 2);
   background: var(--line);
   cursor: pointer;
   transition: background-color 150ms;
@@ -181,8 +419,8 @@ h1 {
   position: absolute;
   top: 4px;
   left: 4px;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--knob);
   transition: translate 150ms;
@@ -198,7 +436,13 @@ h1 {
 }
 
 [role="switch"]:checked::before {
-  translate: 20px 0;
+  translate: 16px 0;
+}
+
+#chooser,
+.font-pick,
+#fontlist {
+  color: var(--accent);
 }
 
 :focus-visible {
@@ -210,5 +454,260 @@ h1 {
   [role="switch"],
   [role="switch"]::before {
     transition: none;
+  }
+}
+
+/* Settings fields come in long lists, so they sit tighter than the popup's. */
+.field {
+  height: var(--field);
+  padding: 0 var(--field-inset);
+  border-radius: var(--gap);
+}
+
+/* A field with one icon button inside it, on the right. */
+.field-box {
+  position: relative;
+}
+
+.field-box .field {
+  padding-right: var(--field);
+}
+
+/* The site's favicon, or a globe, on the left: centred in a square the field's height, mirroring the action icon. */
+.field-icon {
+  position: absolute;
+  top: calc((var(--field) - var(--site-icon)) / 2);
+  left: calc((var(--field) - var(--site-icon)) / 2);
+  width: var(--site-icon);
+  height: var(--site-icon);
+  fill: var(--muted);
+  pointer-events: none;
+}
+
+.field-box:has(.field-icon) .field {
+  padding-left: var(--field);
+}
+
+.field-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: var(--field);
+  height: var(--field);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gap);
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.field-action svg {
+  width: var(--field-icon);
+  height: var(--field-icon);
+  transition: transform 150ms ease;
+}
+
+.field-action svg:not([fill]) {
+  fill: currentColor;
+}
+
+/* A box's button shows only while the box (or the button) is selected. */
+.field-action {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.field-box:focus-within .field-action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.field-action:hover svg {
+  transform: scale(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-action svg {
+    transition: none;
+  }
+}
+
+.rows {
+  display: grid;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows:empty {
+  display: none;
+}
+
+/* Website rows: a drag handle in the page margin, left of the box, shown while the row is pointed at or focused. */
+.site {
+  position: relative;
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+  right: 100%;
+  display: grid;
+  place-items: center;
+  width: var(--page);
+  height: var(--field);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gap);
+  background: none;
+  color: var(--accent);
+  cursor: grab;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.site:hover .handle,
+.site:focus-within .handle,
+.site.dragging .handle {
+  opacity: 1;
+}
+
+/* Touch screens have no pointing, so the handles stay. */
+@media (hover: none) {
+  .handle {
+    opacity: 1;
+  }
+}
+
+.handle svg {
+  width: var(--u);
+  height: var(--u);
+  fill: currentColor;
+}
+
+/* The row being dragged follows the pointer above the others, which slide out of its way. */
+.site.dragging {
+  z-index: 1;
+}
+
+.site.dragging,
+.site.dragging .handle {
+  cursor: grabbing;
+}
+
+.site.dragging .field {
+  border-color: var(--accent);
+  box-shadow: 0 calc(var(--u) / 4) calc(var(--u) / 2) color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+/* Where a dragged row will land: a line in the middle of the gap. */
+.site.drop-before::before,
+.site.drop-after::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.site.drop-before::before {
+  top: calc(var(--gap) / -2 - 1px);
+}
+
+.site.drop-after::after {
+  bottom: calc(var(--gap) / -2 - 1px);
+}
+
+/* A faint rule between sections, with a line of space on each side (half from the grid gap, half here). */
+.divider {
+  width: 100%;
+  margin: var(--gap) 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+/* Behind the settings page: a soft light from above that fades to a little shadow at the bottom of the window,
+   under the dots drawn by depth.js. */
+html:has(body.page) {
+  /* Firefox's brand colours as soft glows around the window: yellow and orange at the left, like the flame,
+     pink at the top right, purple and violet at the bottom. Stronger in the dark theme, where they glow. */
+  --fx-yellow: light-dark(rgb(255 189 79 / 0.3), rgb(255 189 79 / 0.16));
+  --fx-orange: light-dark(rgb(255 113 57 / 0.22), rgb(255 113 57 / 0.2));
+  --fx-pink: light-dark(rgb(255 74 162 / 0.18), rgb(255 74 162 / 0.2));
+  --fx-purple: light-dark(rgb(144 89 255 / 0.2), rgb(144 89 255 / 0.28));
+  --fx-violet: light-dark(rgb(89 42 203 / 0.12), rgb(89 42 203 / 0.4));
+  background:
+    radial-gradient(55% 45% at 0% 0%, var(--fx-yellow), transparent),
+    radial-gradient(45% 55% at 0% 60%, var(--fx-orange), transparent),
+    radial-gradient(50% 45% at 100% 5%, var(--fx-pink), transparent),
+    radial-gradient(60% 50% at 100% 85%, var(--fx-purple), transparent),
+    radial-gradient(80% 45% at 30% 110%, var(--fx-violet), transparent),
+    linear-gradient(rgb(255 255 255 / 0.04), transparent 50%, rgb(0 0 0 / 0.04)),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* The chosen font: a box drawn in that font, on frosted glass a little apart from the glow; a click opens the list. */
+#chooser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--field-inset);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  font-feature-settings: normal;
+  text-align: left;
+  cursor: pointer;
+}
+
+#chooser:hover {
+  border-color: var(--accent);
+}
+
+#chooser svg {
+  flex: none;
+  width: var(--field-icon);
+  height: var(--field-icon);
+  color: var(--accent);
+}
+
+.depth {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+body.page {
+  background: none;
+}
+
+/* One-shade favicons that would vanish against the theme (a black mark on dark, a white one on light) are flipped. */
+:root[data-theme="dark"] img[data-tone="dark"],
+:root[data-theme="light"] img[data-tone="light"] {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] img[data-tone="dark"] {
+    filter: invert(1);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] img[data-tone="light"] {
+    filter: invert(1);
   }
 }

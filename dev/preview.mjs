@@ -13,10 +13,17 @@ const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/cs
 const clients = new Set();
 
 // Saves go to every open preview: CSS is swapped without a reload, so the page keeps its state.
+// Editors often save through a temporary file, so changes settle for a moment before the pages hear of them.
+let timer;
+let kind = "css";
 watch(src, { recursive: true }, (_, file) => {
   if (!file) return;
-  const kind = extname(file) === ".css" ? "css" : "reload";
-  for (const res of clients) res.write(`data: ${kind}\n\n`);
+  if (extname(file) !== ".css") kind = "reload";
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    for (const res of clients) res.write(`data: ${kind}\n\n`);
+    kind = "css";
+  }, 150);
 });
 
 createServer(async (req, res) => {
