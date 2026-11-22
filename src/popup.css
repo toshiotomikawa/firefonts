@@ -23,7 +23,7 @@
 
 body {
   margin: 0;
-  width: calc(var(--u) * 12);
+  width: calc(var(--u) * 16);
   background: var(--bg);
   color: var(--text);
   /* Set in Allo (Josh Puckett, OFL) with stylistic set 2, as on the Tomi ESL site. */
@@ -378,7 +378,7 @@ body.page main {
   width: var(--field-icon);
   height: var(--field-icon);
   background: var(--accent);
-  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.0303 7.96967C18.3232 8.26256 18.3232 8.73744 18.0303 9.03033L11.0303 16.0303C10.7374 16.3232 10.2626 16.3232 9.96967 16.0303L5.96967 12.0303C5.67678 11.7374 5.67678 11.2626 5.96967 10.9697C6.26256 10.6768 6.73744 10.6768 7.03033 10.9697L10.5 14.4393L16.9697 7.96967C17.2626 7.67678 17.7374 7.67678 18.0303 7.96967Z"/></svg>') center / contain no-repeat;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12.5L10 17L18.5 7.5"/></svg>') center / contain no-repeat;
 }
 
 /* A font the user added can be removed: its cross shows while the row is pointed at, in place of the tick. */
@@ -480,7 +480,7 @@ body.page main {
   left: calc((var(--field) - var(--site-icon)) / 2);
   width: var(--site-icon);
   height: var(--site-icon);
-  fill: var(--muted);
+  color: var(--muted);
   pointer-events: none;
 }
 
@@ -720,5 +720,37 @@ body.page {
 
 #scope {
   margin: 0;
+  color: var(--muted);
+}
+
+/* The popup's title: the logo and the name, centred above the controls. */
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+  margin: 0;
+  padding: var(--page) var(--page) 0;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.brand img {
+  width: calc(var(--u) * 1.25);
+  height: calc(var(--u) * 1.25);
+}
+
+/* The popup's buttons: settings, GitHub and theme, in one centred row under the controls. */
+.tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap);
+}
+
+/* The open website, on its own line under the switch's label. */
+#host {
+  display: block;
   color: var(--muted);
 }

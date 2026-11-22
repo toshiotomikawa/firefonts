@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Firefonts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Changes the font of the sites you choose.",
   "icons": { "48": "icon.svg", "96": "icon.svg" },
   "browser_specific_settings": {
