@@ -31,6 +31,7 @@
         localStorage.setItem("theme", next);
       } catch {}
       apply(next);
+      document.getElementById("spoken").textContent = names[next];
     });
   });
 })();

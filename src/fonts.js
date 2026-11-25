@@ -2,6 +2,27 @@
 // Adds font files the user picks to the extension, so any site can use them by name, and removes them.
 const note = document.getElementById("note");
 
+// Tells screen readers what changed, a moment later, so it isn't lost under the focus moving.
+const spoken = document.getElementById("spoken");
+let speaking;
+function say(text) {
+  clearTimeout(speaking);
+  spoken.textContent = "";
+  speaking = setTimeout(() => (spoken.textContent = text), 500);
+}
+
+// Says under a field why its address can't be used, tied to the field while it shows; "" clears it.
+function explain(field, problem, text) {
+  if (text || problem.textContent) say(text);
+  problem.textContent = text;
+  const ids = (field.getAttribute("aria-describedby") ?? "").split(" ").filter((id) => id && id !== problem.id);
+  if (text) ids.push(problem.id);
+  if (ids.length) field.setAttribute("aria-describedby", ids.join(" "));
+  else field.removeAttribute("aria-describedby");
+  if (text) field.setAttribute("aria-invalid", "true");
+  else field.removeAttribute("aria-invalid");
+}
+
 // Loads a stored font into this page so its name can be drawn in it; false when the file isn't a font.
 async function use(name, data) {
   try {
@@ -128,6 +149,7 @@ async function removeFont(name) {
   if (users.length) await browser.storage.sync.set(Object.fromEntries(users.map((key) => [key, FF.DEFAULT])));
   showSites();
   await show();
+  say(`Removed ${name}`);
   if (!open) return;
   open.removable = open.removable.filter((own) => own !== name);
   if (open.current === name) open.current = FF.DEFAULT;
@@ -258,6 +280,7 @@ document.getElementById("add").addEventListener("click", () => document.getEleme
 
 document.getElementById("files").addEventListener("change", async (event) => {
   const failed = [];
+  const added = [];
   for (const file of event.target.files) {
     const name = FF.cleanName(file.name.replace(/\.(ttf|otf|woff2?)$/i, ""));
     const data = await file.arrayBuffer();
@@ -267,12 +290,14 @@ document.getElementById("files").addEventListener("change", async (event) => {
     }
     try {
       await browser.storage.local.set({ [FF.fileKey(name)]: data });
+      added.push(name);
     } catch {
       failed.push(file.name);
     }
   }
   event.target.value = "";
   note.textContent = failed.length ? `Couldn't add ${failed.join(", ")}` : "";
+  if (added.length) say(`Added ${added.join(", ")}`);
   show();
 });
 
@@ -280,6 +305,7 @@ show();
 
 // Websites: each added site gets the default font, and Firefox asks for access to that site only.
 const siteField = document.getElementById("site");
+const siteProblem = document.getElementById("site-problem");
 const sites = document.getElementById("sites");
 const rowTemplate = document.getElementById("site-row");
 
@@ -431,9 +457,12 @@ async function showSites(focus) {
         const handle = row.querySelector(".handle");
         handle.setAttribute("aria-label", `Move ${host}`);
         handle.title = `Move ${host}`;
+        handle.setAttribute("aria-description", "Press the Up or Down arrow key to move");
         handle.addEventListener("pointerdown", (event) => drag(event, row));
         handle.addEventListener("keydown", (event) => moveByKey(event, row));
-        editable(row.querySelector("input"), host);
+        const problem = row.querySelector(".problem");
+        problem.id = `problem-${host}`;
+        editable(row.querySelector("input"), problem, host);
         // A site added on another device, or taken back in Firefox's settings, waits for Firefox's permission,
         // and isn't contacted for its icon until then.
         const allowButton = row.querySelector(".allow");
@@ -467,7 +496,7 @@ async function showSites(focus) {
 // was clicked. Editing it and pressing Enter (or leaving the box) changes the site; Escape puts it back. Firefox
 // asks for a new site only on a key press or click, so leaving the box for a site it hasn't allowed keeps the
 // typed address in the box, marked, until Enter asks for it.
-function editable(field, host) {
+function editable(field, problem, host) {
   const full = `https://${host}`;
   const short = host.replace(/^www\./, "");
   const hidden = full.length - short.length;
@@ -499,12 +528,10 @@ function editable(field, host) {
     draft = result === "ask" || result === "invalid" ? typed : null;
     if (draft !== null) {
       field.value = draft;
-      field.setAttribute("aria-invalid", "true");
-      field.title = result === "ask" ? "Press Enter to allow this site" : "Not a website address, or already listed";
+      explain(field, problem, result === "ask" ? "Press Enter to allow this website" : "Not a website address, or already listed");
     } else if (!result) {
       field.value = document.activeElement === field ? full : short;
-      field.removeAttribute("aria-invalid");
-      field.removeAttribute("title");
+      explain(field, problem, "");
     }
   };
   field.addEventListener("keydown", (event) => {
@@ -515,8 +542,7 @@ function editable(field, host) {
     }
     if (event.key === "Escape") {
       draft = null;
-      field.removeAttribute("aria-invalid");
-      field.removeAttribute("title");
+      explain(field, problem, "");
       field.value = full;
       field.blur();
     }
@@ -525,7 +551,7 @@ function editable(field, host) {
     await finish(false);
     if (document.activeElement !== field && draft === null) field.value = short;
   });
-  field.addEventListener("input", () => field.removeAttribute("aria-invalid"));
+  field.addEventListener("input", () => explain(field, problem, ""));
 }
 
 // Moves a site's font to a new address, in the same place in the list. False when the address isn't usable, and
@@ -550,7 +576,7 @@ async function renameSite(host, text, asking) {
 async function addSite() {
   const host = hostFrom(siteField.value);
   const valid = FF.validHost(host);
-  siteField.setAttribute("aria-invalid", String(!valid));
+  explain(siteField, siteProblem, valid ? "" : "Not a website address");
   if (!valid) return;
   // Asked straight from the click or key press, as Firefox requires.
   if (!(await allow(host))) return;
@@ -558,7 +584,6 @@ async function addSite() {
   await browser.storage.sync.set({ [FF.keyFor(host)]: await chosenFont() });
   await saveOrder([...order, host]);
   siteField.value = "";
-  siteField.removeAttribute("aria-invalid");
   showSites();
   siteField.focus();
 }
@@ -567,7 +592,7 @@ document.getElementById("add-site").addEventListener("click", addSite);
 siteField.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.isComposing) addSite();
 });
-siteField.addEventListener("input", () => siteField.removeAttribute("aria-invalid"));
+siteField.addEventListener("input", () => explain(siteField, siteProblem, ""));
 
 showSites();
 
@@ -590,6 +615,9 @@ function slide(rows, change) {
     if (shift) row.animate([{ transform: `translateY(${shift}px)` }, { transform: "none" }], { duration: 150, easing: "ease" });
   }
 }
+
+// Says where a moved row now is.
+const sayPlace = (row) => say(`${row.dataset.host}, ${[...sites.children].indexOf(row) + 1} of ${sites.children.length}`);
 
 // Dragging by the handle: the row follows the pointer, a line shows where it will land, and the order
 // changes only when it is dropped.
@@ -625,7 +653,10 @@ function drag(event, row) {
       row.style.translate = "";
       if (moved) sites.insertBefore(row, target);
     });
-    if (moved) saveOrder();
+    if (moved) {
+      sayPlace(row);
+      saveOrder();
+    }
   };
   handle.addEventListener("pointermove", move);
   handle.addEventListener("lostpointercapture", end, { once: true });
@@ -638,5 +669,6 @@ function moveByKey(event, row) {
   event.preventDefault();
   slide([...sites.children], () => sites.insertBefore(row, target));
   row.querySelector(".handle").focus();
+  sayPlace(row);
   saveOrder();
 }

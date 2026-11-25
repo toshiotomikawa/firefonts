@@ -70,9 +70,10 @@
    Shadow DOM is out of reach: a page stylesheet can't style inside it. */
 html[data-firefonts] *:not(
   svg, svg *,
-  i:empty,
+  :is(a, b, button, em, i, span):empty, i[aria-hidden="true"],
   [class*="icon" i]:not([class*="lexicon" i], [class*="silicon" i]),
   [class~="icon" i] *,
+  [class*="icon" i]:not([class*="lexicon" i], [class*="silicon" i]) i,
   [class*="material-symbols" i], [class*="material-icons" i], [class*="google-symbols" i], [class*="glyph" i],
   .fa, .fas, .far, .fab, .fal, .fad, [class^="fa-"], [class*=" fa-"],
   .mdi, [class^="mdi-"], [class*=" mdi-"],

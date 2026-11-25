@@ -6,13 +6,13 @@ colors:
   background: "#ffffff"
   text: "#000000"
   muted: "#5e5e66"
-  line: "#92929a"
+  line: "#7c7c84"
   accent: "#1a1a1a"
   knob: "#ffffff"
   background-dark: "#1f1f23"
   text-dark: "#ffffff"
   muted-dark: "#a8a8b3"
-  line-dark: "#6a6a72"
+  line-dark: "#8a8a92"
   accent-dark: "#e6e6e6"
   knob-dark: "#1f1f23"
 typography:
@@ -90,7 +90,7 @@ Two surfaces. The toolbar popup (`src/popup.html`) is the quick one: a switch to
 
 ## Colors
 
-Graphite and paper: the accent is graphite (10% brightness) in the light theme and paper (90%) in the dark one, with no blue. Text is pure black, or white in the dark theme; text inside a font selector takes the accent. Field outlines are as light as they can be while keeping 3:1 contrast. Each colour has a `-dark` twin, applied through `color-scheme` and `light-dark()`.
+Graphite and paper: the accent is graphite (10% brightness) in the light theme and paper (90%) in the dark one, with no blue. Text is pure black, or white in the dark theme; text inside a font selector takes the accent. Field outlines are as light as they can be while keeping 3:1 contrast, over the settings page's glow too. Each colour has a `-dark` twin, applied through `color-scheme` and `light-dark()`.
 
 Behind the settings page, Firefox's brand colours glow faintly from the window's edges (yellow and orange at the left, pink at the top right, purple and violet at the bottom), stronger in the dark theme, under a triangular grid of faint dots exactly one line apart (`src/depth.js`).
 
@@ -106,9 +106,9 @@ Allo (Josh Puckett, OFL) with stylistic set 2, in three sizes only: 16px body, 1
 
 ## Layout
 
-Everything is measured in lines: one line is 24px, the height of a line of body text. Gaps are half a line, the page margin one line, and settings fields a line and a half (36px), with their icons centred in a square of that height. Everything is symmetric.
+Everything is measured in lines: one line is 24px, the height of a line of body text, set in rem so it follows the font size chosen in Firefox. Gaps are half a line, the page margin one line, and settings fields a line and a half (36px), with their icons centred in a square of that height. Everything is symmetric.
 
-The popup is a 384px column (16 lines), wider than it is tall: the logo and name centred at the top, the switch and font field, then a centred row of icon buttons for settings (a gear), GitHub and the theme. The settings page is a centred column up to 576px (24 lines) with three numbered sections, Fonts, Preview and Websites, divided by faint rules, and a footer with the GitHub and theme buttons held at the bottom of the window.
+The popup is a 384px column (16 lines), or the window's width if that is narrower, wider than it is tall: the logo and name centred at the top, the switch and font field, then a centred row of icon buttons for settings (a gear), GitHub and the theme. The settings page is a centred column up to 576px (24 lines) with three numbered sections, Fonts, Preview and Websites, divided by faint rules, and a footer with the GitHub and theme buttons held at the bottom of the window.
 
 Under 840px the settings page keeps one column that fills the window less the one-line margin. Touch screens show the drag handles all the time, since nothing can point at a row.
 
@@ -119,7 +119,7 @@ Under 840px the settings page keeps one column that fills the window less the on
 - **Font chooser:** a field showing the chosen font in itself. A click opens the font list over the page with the current font exactly where the button was; arrow keys, Home, End, Page Up and Down, typing and Enter work from the button, Escape closes it unchanged.
 - **Font list:** every bundled and added font, A to Z, eight rows at a time, each drawn in itself and ticked when current. An added font shows a cross in place of the tick while pointed at, and Delete removes it.
 - **Apply to all switch:** on by default, giving the chosen font to every website; off, each website gets its own font chooser under its box.
-- **Website box:** the site's favicon (or a globe), its short address, and the full address while editing. Enter or leaving the box renames the site; Escape puts it back. Firefox asks for a new site only on a key press, so leaving the box for a site it hasn't allowed keeps the typed address with a dashed outline until Enter. A drag handle in the margin reorders the list, and the arrow keys do the same. A site Firefox hasn't allowed yet is faded, with an Allow button under it, and its icon isn't fetched until then.
+- **Website box:** the site's favicon (or a globe), its short address, and the full address while editing. Enter or leaving the box renames the site; Escape puts it back. Firefox asks for a new site only on a key press, so leaving the box for a site it hasn't allowed keeps the typed address with a dashed outline until Enter. A sentence under the box says why an address can't be used. A drag handle in the margin reorders the list, and the arrow keys do the same. A site Firefox hasn't allowed yet has its address and icon faded, with an Allow button under it, and its icon isn't fetched until then.
 - **Icon button:** buttons are icons, never text. 48px round, one 24px icon in the accent colour, named by its aria-label and tooltip, tinted 10% on hover.
 - **Blocked page:** pages Firefox protects show one sentence instead of the popup's controls.
 

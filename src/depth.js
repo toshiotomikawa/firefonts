@@ -8,7 +8,7 @@
   document.body.prepend(canvas);
   const context = canvas.getContext("2d");
 
-  const U = 24; // one line
+  const U = parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.5; // one line
   const ROW = (U * Math.sqrt(3)) / 2; // rows sit √3/2 of a line apart
   const RADIUS = 0.75;
 

@@ -21,6 +21,7 @@
       </button>
       <input type="file" id="files" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
     </header>
+    <p id="spoken" role="status"></p>
     <p id="note" role="status"></p>
     <p id="choose">Choose your font:</p>
     <button type="button" id="chooser" class="field" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="fontlist" aria-labelledby="choose">
@@ -41,10 +42,11 @@
     <ul id="sites" class="rows" aria-labelledby="sites-title"></ul>
     <div class="field-box">
       <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="currentColor" fill-opacity="0.12"/><path d="M12 3.5C9.5 6 8.5 9 8.5 12S9.5 18 12 20.5C14.5 18 15.5 15 15.5 12S14.5 6 12 3.5Z"/><path d="M4.5 9H19.5M4.5 15H19.5"/></svg>
-      <input type="text" id="site" class="field" aria-labelledby="sites-title" aria-describedby="sites-hint" placeholder="example.com" spellcheck="false" autocomplete="off">
+      <input type="text" id="site" class="field" aria-label="Website to add" aria-describedby="sites-hint" placeholder="example.com" spellcheck="false" autocomplete="off">
       <button type="button" id="add-site" class="field-action" aria-label="Add website" title="Add website">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5L10 17L18.5 7.5"/></svg>
       </button>
+      <p id="site-problem" class="problem"></p>
     </div>
     <template id="site-row">
       <li class="site">
@@ -58,6 +60,7 @@
         <button type="button" class="field-action">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7L17 17M17 7L7 17"/></svg>
         </button>
+        <p class="problem"></p>
         </div>
         <button type="button" class="allow button" hidden>Allow</button>
         <button type="button" class="font-pick" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="fontlist">

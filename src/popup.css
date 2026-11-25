@@ -4,13 +4,14 @@
   /* Headings and body text: black (white in the dark theme). Text inside a font selector is graphite. */
   --text: light-dark(#000000, #ffffff);
   --muted: light-dark(#5e5e66, #a8a8b3);
-  /* Outlines: as light as they can be while keeping the 3:1 contrast a field border needs. */
-  --line: light-dark(#92929a, #6a6a72);
+  /* Outlines: as light as they can be while keeping the 3:1 contrast a field border needs, over the settings page's glow too. */
+  --line: light-dark(#7c7c84, #8a8a92);
   /* Graphite (10% brightness), and paper (90%) in the dark theme. */
   --accent: light-dark(#1a1a1a, #e6e6e6);
   --knob: light-dark(#ffffff, #1f1f23);
-  /* Layout unit: one line of body text (16px at 1.5 line height). Spacing is a multiple or simple fraction of it. */
-  --u: 24px;
+  /* Layout unit: one line of body text (16px at 1.5 line height). Spacing is a multiple or simple fraction of it,
+     and it is in rem, so everything follows the font size set in Firefox. */
+  --u: 1.5rem;
   --gap: calc(var(--u) / 2);
   --page: var(--u);
   /* Settings fields: 1.5 lines tall; their icon is centred in a square of that size, and the text sits as far in as the icon. */
@@ -24,10 +25,11 @@
 body {
   margin: 0;
   width: calc(var(--u) * 16);
+  max-width: 100%;
   background: var(--bg);
   color: var(--text);
   /* Set in Allo (Josh Puckett, OFL) with stylistic set 2, as on the Tomi ESL site. */
-  font: 400 16px/1.5 "Allo", system-ui, sans-serif;
+  font: 400 1rem/1.5 "Allo", system-ui, sans-serif;
   font-feature-settings: "ss02";
 }
 
@@ -73,7 +75,7 @@ main,
   border-radius: 8px;
   background: var(--bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 1rem;
   transition: border-color 150ms ease;
 }
 
@@ -141,12 +143,6 @@ main,
   transform: rotate(90deg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .icon-button svg {
-    transition: none;
-  }
-}
-
 /* A heading's button lines its icon up with the icons inside the fields below. */
 .head .icon-button {
   margin-right: calc((var(--field) - var(--u) * 2) / 2);
@@ -199,7 +195,7 @@ body.page {
 h1,
 h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
 }
 
@@ -209,14 +205,14 @@ h2 {
   letter-spacing: 0.06em;
 }
 
-/* The settings page numbers its sections: 1. Fonts, 2. Preview, 3. Websites. */
+/* The settings page numbers its sections: 1. Fonts, 2. Preview, 3. Websites. Screen readers skip the numbers. */
 body.page main {
   counter-reset: section;
 }
 
 body.page main h2::before {
   counter-increment: section;
-  content: counter(section) ". ";
+  content: counter(section) ". " / "";
 }
 
 /* The preview sentence: a field like the others, in the chosen font, that grows a line at a time with what is typed. */
@@ -231,7 +227,7 @@ body.page main h2::before {
 }
 
 .title {
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 800;
   text-align: center;
 }
@@ -288,7 +284,7 @@ body.page .row {
   display: flex;
 }
 
-/* A website Firefox hasn't allowed yet is faded, with a button to allow it under its box. */
+/* A website Firefox hasn't allowed yet has its address and icon faded, with a button to allow it under its box. */
 .site .allow {
   display: flex;
   min-height: var(--field);
@@ -299,7 +295,11 @@ body.page .row {
   display: none;
 }
 
-.site.waiting .field-box {
+.site.waiting .field {
+  color: var(--muted);
+}
+
+.site.waiting .field-icon {
   opacity: 0.6;
 }
 
@@ -330,16 +330,6 @@ body.page main {
   backdrop-filter: blur(16px) saturate(1.4);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
   scroll-behavior: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fonts {
-    scroll-behavior: auto;
-  }
-
-  .font-pick {
-    transition: none;
-  }
 }
 
 /* The font list: one row per font, its name drawn in itself; the row under the pointer or the arrow keys is
@@ -391,8 +381,17 @@ body.page main {
   display: none;
 }
 
-#note {
+#note,
+.problem {
   margin: 0;
+}
+
+/* Why an address can't be used, under its box, in line with the address. */
+.problem:not(:empty) {
+  display: flex;
+  align-items: center;
+  min-height: var(--field);
+  padding-left: var(--field);
 }
 
 /* Keeps the live region in place without leaving a gap. */
@@ -405,7 +404,7 @@ body.page main {
   flex: none;
   position: relative;
   /* One line tall. */
-  width: 40px;
+  width: 2.5rem;
   height: var(--u);
   margin: 0;
   border-radius: calc(var(--u) / 2);
@@ -417,10 +416,10 @@ body.page main {
 [role="switch"]::before {
   content: "";
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 16px;
-  height: 16px;
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
   background: var(--knob);
   transition: translate 150ms;
@@ -436,7 +435,7 @@ body.page main {
 }
 
 [role="switch"]:checked::before {
-  translate: 16px 0;
+  translate: 1rem 0;
 }
 
 #chooser,
@@ -448,13 +447,6 @@ body.page main {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [role="switch"],
-  [role="switch"]::before {
-    transition: none;
-  }
 }
 
 /* Settings fields come in long lists, so they sit tighter than the popup's. */
@@ -529,12 +521,6 @@ body.page main {
 
 .field-action:hover svg {
   transform: scale(1.12);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .field-action svg {
-    transition: none;
-  }
 }
 
 .rows {
@@ -731,7 +717,7 @@ body.page {
   gap: var(--gap);
   margin: 0;
   padding: var(--page) var(--page) 0;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 800;
   text-transform: none;
   letter-spacing: normal;
@@ -753,4 +739,29 @@ body.page {
 #host {
   display: block;
   color: var(--muted);
+}
+
+/* What changed, for screen readers only. */
+#spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  #add:hover svg,
+  .field-action:hover svg {
+    transform: none;
+  }
 }
