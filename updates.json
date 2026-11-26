@@ -3,9 +3,9 @@
     "firefonts@toshiotomikawa.github.io": {
       "updates": [
         {
-          "update_link": "https://github.com/toshiotomikawa/firefonts/releases/download/v0.3.0/Firefonts-0.3.0.xpi",
-          "version": "0.3.0",
-          "update_hash": "sha256:17141f05a14c1e366adafdd6bbfa5cb15851c0fde52fdd63db00c4929aa0276a"
+          "version": "0.3.1",
+          "update_hash": "sha256:98ad05492062746c1b9e2ad9c39872c5f0c03b5642c75b31f20bed76972e9b16",
+          "update_link": "https://github.com/toshiotomikawa/firefonts/releases/download/v0.3.1/Firefonts-0.3.1.xpi"
         }
       ]
     }
