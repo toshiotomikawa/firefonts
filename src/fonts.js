@@ -528,7 +528,7 @@ function editable(field, problem, host) {
     draft = result === "ask" || result === "invalid" ? typed : null;
     if (draft !== null) {
       field.value = draft;
-      explain(field, problem, result === "ask" ? "Press Enter to allow this website" : "Not a website address, or already listed");
+      explain(field, problem, result === "ask" ? "Go back to this address and press Enter to allow it" : "Not a website address, or already listed");
     } else if (!result) {
       field.value = document.activeElement === field ? full : short;
       explain(field, problem, "");
@@ -591,6 +591,10 @@ async function addSite() {
 document.getElementById("add-site").addEventListener("click", addSite);
 siteField.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.isComposing) addSite();
+  if (event.key === "Escape") {
+    siteField.value = "";
+    explain(siteField, siteProblem, "");
+  }
 });
 siteField.addEventListener("input", () => explain(siteField, siteProblem, ""));
 

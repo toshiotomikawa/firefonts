@@ -11,7 +11,7 @@ The popup, the Settings page, and a sample web page were checked in Chromium on 
 - The popup and the Settings page follow Firefox's font size, up to at least twice the default.
 - With reduced motion on, nothing slides, fades, turns, or grows.
 - Screen readers are sent a message when you change the theme, move a website, add or remove a font, or type an address that can't be used.
-- The popup and the Settings page fit a 320-pixel screen without sideways scrolling.
+- The Settings page fits a 320-pixel screen without sideways scrolling up to twice the default font size, and the popup up to one and a half times; at twice, the popup needs 384 pixels.
 
 Not tested: Firefonts installed in Firefox, on desktop or Android; live websites; screen readers; touch; and Windows High Contrast. Firefonts makes no claim of WCAG conformance.
 
