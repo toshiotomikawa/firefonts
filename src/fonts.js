@@ -591,7 +591,7 @@ async function addSite() {
 document.getElementById("add-site").addEventListener("click", addSite);
 siteField.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.isComposing) addSite();
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && !event.isComposing) {
     siteField.value = "";
     explain(siteField, siteProblem, "");
   }
