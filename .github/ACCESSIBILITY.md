@@ -4,7 +4,7 @@ Firefonts changes the font on the websites you choose. This page covers its popu
 
 ## What was tested
 
-The popup, the Settings page, and a sample web page were checked in Chromium on 23 and 24 November 2026. The changes made since version 0.3.0 were checked on 25 November 2026 in Chromium and a test build of Firefox, as ordinary web pages:
+The popup, the Settings page, and a sample web page were checked in Chromium on 23 and 24 November 2026. The changes in version 0.3.1 were checked on 25 and 26 November 2026 in Chromium and a test build of Firefox, as ordinary web pages:
 
 - Everything can be done with a keyboard, and the control in focus shows a clear outline.
 - Text, field borders, and switches meet the WCAG AA contrast levels in the light and dark themes.
